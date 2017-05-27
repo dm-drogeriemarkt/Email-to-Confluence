@@ -1,0 +1,609 @@
+$webResourceManager.requireResource("com.atlassian.auiplugin:aui-select2")
+
+<html>
+    <head>
+        <title>Mail to Blog Configuration</title>
+        <meta name="decorator" content="atl.admin" />
+        <script type="text/javascript">
+
+            /**
+             * Select port depending on prtocol (IMAP or POP3) and ssl setting.
+             */
+            function selectPort() {
+                var secureField = AJS.$('#mailConfiguration\\.secure');
+                var protocolField =  AJS.$('#mailConfiguration\\.protocol');
+                var portField = AJS.$('#mailConfiguration\\.port');
+
+
+                // ssl, protocol => port.
+                var map = {
+                    true : {
+                        'imap' : '993',
+                        'pop3' : '995',
+                    },
+                    false : {
+                        'imap' : '143',
+                        'pop3' : '110'
+                    }
+                }
+
+                var checked = secureField.is(':checked');
+                var protocol = protocolField.val();
+
+                if (
+                    typeof(checked) == "boolean"
+                    && map[checked][protocol] != undefined
+                ) {
+                    portField.val(map[checked][protocol]);
+                } else {
+                    portField.val('0');
+                }
+            }
+
+            AJS.$(document).ready(function() {
+                AJS.$("#mailConfiguration\\.defaultSpace").auiSelect2();
+                AJS.$("#mailConfiguration\\.securityGroup").auiSelect2();
+            });
+        </script>
+    </head>
+    <body>
+        #if ($actionErrors)
+            <div style="margin-bottom: 10px;">
+                #parse( "/template/includes/actionerrors.vm" )
+            </div>
+        #end
+
+        #if ($actionMessages)
+            <div style="margin-bottom: 10px;">
+                #parse( "/template/includes/actionmessages.vm" )
+            </div>
+        #end
+
+        <div class="help-panel" style="margin-bottom: 10px;">
+            <div class="help-panel-header">
+                <strong>
+                    <span class="aui-icon aui-icon-small aui-iconfont-info confluence-information-macro-icon"></span>
+                    Help
+                </strong>
+            </div>
+            <div class="help-panel-content">
+                <ul>
+                    <li><a href="https://wiki.dm-drogeriemarkt.com/display/MEC/Mail2News">Documentation</a></li>
+                    <li><a href="https://stash.dm-drogeriemarkt.com/projects/STUD/repos/confluence-mail-to-news-plugin/browse">Source Code</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <form class="aui" name="editmailconfiguration_form" method="POST" action="doConfiguration.action">
+            <p><strong>
+                <span class="aui-icon aui-icon-small aui-iconfont-error confluence-information-macro-icon"></span>
+                Warning: When using POP3 processed messages get deleted, because POP3 doesn't support folders.
+            </strong></p>
+            <p><strong>
+                <span class="aui-icon aui-icon-small aui-iconfont-error confluence-information-macro-icon"></span>
+                Warning: If you disable SSL, you're username, password and messages will be readable to an attacker.
+            </strong></p>
+            <div style="margin: 10px 0 0 0;">
+                <fieldset>
+                    <div class="field-group">
+                        <label for="mailConfiguration.server">Server<span class="aui-icon icon-required"> required</span></label>
+                        <input class="text" type="text" id="mailConfiguration.server" name="mailConfiguration.server" value="${mailConfiguration.server}" placeholder="mail.domain">
+                        #foreach ($error in $fieldErrors.get("mailConfiguration.server")) <div class="error">$error</div> #end
+                    </div>
+                </fieldset>
+                <fieldset class="group">
+                    <div class="field-group">
+                        <label for="mailConfiguration.protocol">Protocol</label>
+                        <select class="select" id="mailConfiguration.protocol" name="mailConfiguration.protocol" onchange="selectPort()">
+                            #foreach($p in ["IMAP", "POP3"])
+                                <option value="${p.toLowerCase()}" #if($mailConfiguration.protocol == $p.toLowerCase()) selected="selected" #end>${p}</option>
+                            #end
+                        </select>
+                        #foreach ($error in $fieldErrors.get("mailConfiguration.protocol")) <div class="error">$error</div> #end
+                    </div>
+                </fieldset>
+                <fieldset class="group">
+                    <legend><span>Use SSL</span></legend>
+                    <div class="checkbox">
+                        <input type="checkbox" class="checkbox" name="checkboxTracker.secure" id="mailConfiguration.secure" value="true" #if ($mailConfiguration.secure) checked="checked" #end onclick="selectPort()"/>
+                        <label for="mailConfiguration.secure">Enabled</label>
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <div class="field-group">
+                        <label for="mailConfiguration.port">Port <span class="aui-icon icon-required">required</span></label>
+                        <input class="text" type="number" id="mailConfiguration.port" name="mailConfiguration.port" value="${mailConfiguration.port}" min="0" max="65535">
+                        #foreach ($error in $fieldErrors.get("mailConfiguration.port")) <div class="error">$error</div> #end
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <div class="field-group">
+                        <label for="mailConfiguration.emailaddress">Email Address <span class="aui-icon icon-required">required</span></label>
+                        <input class="text" type="email" id="mailConfiguration.emailaddress" name="mailConfiguration.emailaddress" value="${mailConfiguration.emailaddress}" placeholder="user@domain">
+                        #foreach ($error in $fieldErrors.get("mailConfiguration.emailaddress")) <div class="error">$error</div> #end
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <div class="field-group">
+                        <label for="mailConfiguration.username">User name <span class="aui-icon icon-required">required</span></label>
+                        <input class="text" type="text" id="mailConfiguration.username" name="mailConfiguration.username" value="${mailConfiguration.username}" placeholder="user@domain">
+                        #foreach ($error in $fieldErrors.get("mailConfiguration.username")) <div class="error">$error</div> #end
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <div class="field-group">
+                        <label for="mailConfiguration.password">Password</label>
+                        <input class="password" type="password" id="mailConfiguration.password" name="mailConfiguration.password" value="${mailConfiguration.password}">
+                    </div>
+                </fieldset>
+            </div>
+
+            <div style="margin: 10px 0 0 0;">
+                <fieldset>
+                    <div class="field-group">
+                        <label for="mailConfiguration.defaultSpace">Default Space <span class="aui-icon icon-required">required</span></label>
+
+                        <select id="mailConfiguration.defaultSpace" name="mailConfiguration.defaultSpace">
+                            #foreach($space in $spaces.entrySet())
+                                <option
+                                    value="${space.key}"
+                                    #if($space.key == $mailConfiguration.defaultSpace)
+                                        selected="selected"
+                                    #end
+                                >
+                                    ${space.value}
+                                </option>
+                            #end
+                        </select>
+
+                        <div class="description">
+                            #if ($spaces.isEmpty())
+                                <strong>
+                                    <span class="aui-icon aui-icon-small aui-iconfont-error confluence-information-macro-icon"></span>
+                                    Please create a
+                                    <a href="https://confluence.atlassian.com/doc/spaces-139459.html" class="external-link" rel="nofollow">
+                                        Space
+                                    </a> and reload this page
+                                </strong>
+                            #else
+                                Default
+                                <a href="https://confluence.atlassian.com/doc/spaces-139459.html" class="external-link" rel="nofollow">
+                                    Space
+                                </a>
+                                into which to post
+                            #end
+                        </div>
+
+                        #foreach ($error in $fieldErrors.get("mailConfiguration.defaultSpace")) <div class="error">$error</div> #end
+
+                    </div>
+                </fieldset>
+            </div>
+
+            <h2>Advanced Configuration</h2>
+
+            <div style="margin: 10px 0 0 0;">
+                <div class="aui-tabs horizontal-tabs">
+                    <ul class="tabs-menu">
+                        <li class="menu-item active-tab">
+                            <a href="#tabs-spaces">Spaces</a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="#tabs-format">Formatting</a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="#tabs-attachments">Attachments</a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="#tabs-senders">Senders</a>
+                        </li>
+                        <li class="menu-item">
+                            <a href="#tabs-misc">Miscellaneous</a>
+                        </li>
+                    </ul>
+
+                    <div class="tabs-pane active-pane" id="tabs-spaces">
+                        <div style="margin: 10px 0 0 0;">
+                            <h3>Spaces</h3>
+                            <p>
+                                Confluence stores pages and blog posts in
+                                <a href="https://confluence.atlassian.com/doc/spaces-139459.html" class="external-link" rel="nofollow">spaces</a>.
+                                All spaces are identified by their <a href="https://confluence.atlassian.com/doc/space-keys-829076188.html" class="external-link" rel="nofollow">space key</a>.
+                                By default all posts land in the default space, but you can enable other strategies for determining the space into which to post.
+                            </p>
+                            <div style="margin: 10px 0 0 0;">
+                                <fieldset class="group">
+                                    <legend><span>Address</span></legend>
+                                    <div class="checkbox">
+                                        <input
+                                            class="checkbox"
+                                            type="checkbox"
+                                            name="checkboxTracker.spaceKeyInAddress"
+                                            id="mailConfiguration.spaceKeyInAddress"
+                                            value="true"
+                                            #if ($mailConfiguration.spaceKeyInAddress) checked="checked" #end
+                                        />
+                                        <label for="mailConfiguration.spaceKeyInAddress">Look for the space key in the mail address</label>
+                                        <div class="description">Use spacekey+recipient@example.org to set the space key</div>
+                                    </div>
+                                </fieldset>
+
+                                <fieldset class="group">
+                                    <legend><span>Subject</span></legend>
+                                    <div class="checkbox">
+                                        <input
+                                            class="checkbox"
+                                            type="checkbox"
+                                            name="checkboxTracker.spaceKeyInSubject"
+                                            id="mailConfiguration.spaceKeyInSubject"
+                                            value="true"
+                                            #if ($mailConfiguration.spaceKeyInSubject) checked="checked" #end
+                                        />
+                                        <label for="mailConfiguration.spaceKeyInSubject">Look for space key in the subject line</label>
+                                        <div class="description">Use "spacekey: Title" as subject to set the space key</div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tabs-pane" id="tabs-format">
+                        <div style="margin: 10px 0 0 0;">
+                            <h3>Preferred Format</h3>
+                            <p>Often E-Mails contain a HTML and a plain text version.</p>
+                            <div style="margin: 10px 0 0 0;">
+                                <fieldset class="group">
+                                    <legend><span>Preferred Format</span></legend>
+                                    <div class="radio" style="display: inline-block;">
+                                        <input
+                                            class="radio"
+                                            type="radio"
+                                            id="preferred-html"
+                                            name="preferred"
+                                            value="html"
+                                            #if ($preferred == "html") checked="checked" #end
+                                        >
+                                        <label for="preferred-html">HTML</label>
+                                    </div>
+                                    &nbsp;
+                                    <div class="radio" style="display: inline-block;">
+                                        <input
+                                            class="radio"
+                                            type="radio"
+                                            id="preferred-text"
+                                            name="preferred"
+                                            value="text"
+                                            #if ($preferred == "text") checked="checked" #end
+                                        />
+                                        <label for="preferred-text">Plain&nbsp;Text</label>
+                                    </div>
+                                    #foreach ($error in $fieldErrors.get("preferred")) <div class="error">$error</div> #end
+                                </fieldset>
+                            </div>
+
+                            <h3>HTML Macro</h3>
+                            <p>
+                                Using the HTML macro even complex newsletters are usually displayed flawlessly,
+                                but you can't edit the message with the Confluence WYSIWYG-editor.
+                                To use this option you need to enable the
+                                <a href="https://confluence.atlassian.com/doc/html-macro-38273085.html">HTML macro</a>.
+                            </p>
+                            <p><strong>
+                                <span class="aui-icon aui-icon-small aui-iconfont-error confluence-information-macro-icon"></span>
+                                Warning: Activating the HTML macro in Confluence is a security issue
+                                if non trusted users have permissions to create pages/blog posts.
+                            </strong></p>
+                            <div style="margin: 10px 0 0 0;">
+                                <fieldset class="group">
+                                    <legend><span>Html Macro</span></legend>
+                                    <div class="checkbox">
+                                        <input
+                                            class="checkbox"
+                                            type="checkbox"
+                                            name="checkboxTracker.htmlmacro"
+                                            id="mailConfiguration.htmlmacro"
+                                            value="true"
+                                            #if ($mailConfiguration.htmlmacro) checked="checked" #end
+                                        />
+                                        <label for="mailConfiguration.htmlmacro">Wrap mails into HTML macros</label>
+                                    </div>
+                                </fieldset>
+                            </div>
+
+
+                            <h3>HTML Filters</h3>
+                            <p>
+                                All HTML contained in mails is filtered, to remove dangerous or broken code, before getting posted in confluence.
+                                The filter uses a whitelist approach, you can fine control what is allowed in mails using the checkboxes below.
+                            </p>
+                            <div style="margin: 10px 0 0 0;">
+                                <fieldset class="group">
+                                    <legend><span>Blocks</span></legend>
+                                    <div class="checkbox">
+                                        <input
+                                            class="checkbox"
+                                            type="checkbox"
+                                            name="checkboxTracker.htmlFilterBlocks"
+                                            id="mailConfiguration.htmlFilterBlocks"
+                                            value="true"
+                                            #if (${mailConfiguration.htmlFilterBlocks}) checked="checked" #end
+                                        />
+                                        <label for="mailConfiguration.htmlFilterBlocks">
+                                           Allow common block elements including &lt;p&gt;, &lt;h1&gt;, etc.
+                                        </label>
+                                    </div>
+                                </fieldset>
+
+                                <fieldset class="group">
+                                    <legend><span>Formatting</span></legend>
+                                    <div class="checkbox">
+                                        <input
+                                            class="checkbox"
+                                            type="checkbox"
+                                            name="checkboxTracker.htmlFilterFormatting"
+                                            id="mailConfiguration.htmlFilterFormatting"
+                                            value="true"
+                                            #if (${mailConfiguration.htmlFilterFormatting}) checked="checked" #end
+                                        />
+                                        <label for="mailConfiguration.htmlFilterFormatting">
+                                            Allow common formatting elements including &lt;b&gt;, &lt;i&gt;, etc.
+                                        </label>
+                                    </div>
+                                </fieldset>
+
+                                <fieldset class="group">
+                                    <legend><span>Images</span></legend>
+                                    <div class="checkbox">
+                                        <input
+                                            class="checkbox"
+                                            type="checkbox"
+                                            name="checkboxTracker.htmlFilterImages"
+                                            id="mailConfiguration.htmlFilterImages"
+                                            value="true"
+                                            #if (${mailConfiguration.htmlFilterImages}) checked="checked" #end
+                                        />
+                                        <label for="mailConfiguration.htmlFilterImages">
+                                            Allow &lt;img&gt; elements from HTTP, HTTPS, and relative sources
+                                        </label>
+                                    </div>
+                                </fieldset>
+
+                                <fieldset class="group">
+                                    <legend><span>Links</span></legend>
+                                    <div class="checkbox">
+                                        <input
+                                            class="checkbox"
+                                            type="checkbox"
+                                            name="checkboxTracker.htmlFilterLinks"
+                                            id="mailConfiguration.htmlFilterLinks"
+                                            value="true"
+                                            #if (${mailConfiguration.htmlFilterLinks}) checked="checked" #end
+                                        />
+                                        <label for="mailConfiguration.htmlFilterLinks">
+                                            Allow HTTP, HTTPS, MAILTO, and relative links
+                                        </label>
+                                    </div>
+                                </fieldset>
+
+                                <fieldset class="group">
+                                    <legend><span>Styles</span></legend>
+                                    <div class="checkbox">
+                                        <input
+                                            class="checkbox"
+                                            type="checkbox"
+                                            name="checkboxTracker.htmlFilterStyles"
+                                            id="mailConfiguration.htmlFilterStyles"
+                                            value="true"
+                                            #if (${mailConfiguration.htmlFilterStyles}) checked="checked" #end
+                                        />
+                                        <label for="mailConfiguration.htmlFilterStyles">
+                                            Allow certain safe CSS properties in style=&quot;...&quot; attributes
+                                        </label>
+                                    </div>
+                                </fieldset>
+
+                                <fieldset class="group">
+                                    <legend><span>Tables</span></legend>
+                                    <div class="checkbox">
+                                        <input
+                                            class="checkbox"
+                                            type="checkbox"
+                                            name="checkboxTracker.htmlFilterTables"
+                                            value="true"
+                                            #if (${mailConfiguration.htmlFilterTables}) checked="checked" #end
+                                        />
+                                        <label for="mailConfiguration.htmlFilterTables">
+                                            Allow html tables
+                                        </label>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tabs-pane" id="tabs-attachments">
+                        <div style="margin: 10px 0 0 0;">
+                            <h3>Attachments</h3>
+                            <div style="margin: 10px 0 0 0;">
+                                <fieldset>
+                                    <div class="field-group">
+                                        <label for="mailConfiguration.maxAllowedAttachmentSize">Max. Size</label>
+                                        <input
+                                            class="text"
+                                            type="number"
+                                            id="mailConfiguration.maxAllowedAttachmentSize"
+                                            name="mailConfiguration.maxAllowedAttachmentSize"
+                                            min="1"
+                                            max="2048"
+                                            value="${mailConfiguration.maxAllowedAttachmentSize}"
+                                        >
+                                        <div class="description">
+                                            Maximum size of an attachment (in MB).
+                                            <br />
+                                            Attachments must still be smaller than the general
+                                            <a href="https://confluence.atlassian.com/doc/configuring-attachment-size-150040.html">
+                                                maximum attachment size
+                                            </a>
+                                            .
+                                        </div>
+                                        #foreach ($error in $fieldErrors.get("mailConfiguration.maxAllowedAttachmentSize")) <div class="error">$error</div> #end
+                                    </div>
+                                </fieldset>
+                            </div>
+
+                            <div style="margin: 10px 0 0 0;">
+                                <fieldset>
+                                    <div class="field-group">
+                                        <label for="mailConfiguration.maxAllowedNumberOfAttachments">Max. Number</label>
+                                        <input
+                                            class="text"
+                                            type="number"
+                                            id="mailConfiguration.maxAllowedNumberOfAttachments"
+                                            name="mailConfiguration.maxAllowedNumberOfAttachments"
+                                            value="${mailConfiguration.maxAllowedNumberOfAttachments}"
+                                            min="-1"
+                                        >
+                                        <div class="description">
+                                            Maximum number of attachments.<br>
+                                            Use -1 for no restriction.
+                                        </div>
+                                        #foreach ($error in $fieldErrors.get("mailConfiguration.maxAllowedNumberOfAttachments")) <div class="error">$error</div> #end
+                                    </div>
+                                </fieldset>
+                            </div>
+
+                            <h4>File Types</h4>
+                            <p>
+                                Some attachments in emails may contain malious code. To prevent malware from being spread through Confluence
+                                only relativly safe file types are allowed by default. Windows uses file extensions to categorize files,
+                                the web uses <a href="https://www.iana.org/assignments/media-types/media-types.xhtml">mime types</a>.
+                                To prevent bypassing of filters it is important that file extensions and mime types match.
+                                You can edit the list of allowed file&nbsp;extensions/mime&nbsp;types to allow additional file types or to enforce more restrictions.
+                            </p>
+
+                            <div class="aui-message aui-message-error">
+                                <p class="title">Allowing the following file types poses a large security risk:</p>
+                                <ul class="alternate">
+                                    <li>Executable files like .exe, .bat, .sh, .jar, ...</li>
+                                    <li>Documents that can contain macros like .doc, .xls, ppt, ...</li>
+                                    <li>Archives, because they can carry dangerous files, like .zip, .tar, .7z, ...</li>
+                                </ul>
+                            </div>
+
+                            <div style="margin: 10px 0 0 0;">
+                                <div class="field-group" style="padding-left: 0;">
+                                    <textarea
+                                        class="textarea"
+                                        name="mailConfiguration.allowedFileTypes"
+                                        id="mailConfiguration.allowedFileTypes"
+                                        style="max-width: none; min-height: 300px; font-family: monospace;"
+                                    >${mailConfiguration.allowedFileTypes}</textarea>
+                                    <div class="description">FileExtension MimeType</div>
+                                    #foreach ($error in $fieldErrors.get("mailConfiguration.allowedFileTypes")) <div class="error">$error</div> #end
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tabs-pane" id="tabs-misc">
+                        <div style="margin: 10px 0 0 0;">
+                            <h3>Miscellaneous</h3>
+                            <p>
+                                The <a href="https://confluence.atlassian.com/doc/gallery-macro-139434.html">gallery macro</a> can
+                                be used to display images in a gallery. If you enable this option, all attached images are shown in a gallery.
+                            </p>
+                            <div style="margin: 10px 0 0 0;">
+                                <fieldset class="group">
+                                    <legend><span>Gallery Macro</span></legend>
+                                    <div class="checkbox">
+                                        <input
+                                            class="checkbox"
+                                            type="checkbox"
+                                            name="checkboxTracker.gallerymacro"
+                                            id="mailConfiguration.gallerymacro"
+                                            value="true"
+                                            #if ($mailConfiguration.gallerymacro) checked="checked" #end
+                                        />
+                                        <label for="mailConfiguration.gallerymacro">Add gallery macro to blog posts</label>
+                                    </div>
+                                </fieldset>
+                            </div>
+                            <div class="aui-message aui-message-error">
+                                <p>
+                                    Disabling certificate checks poses a security risk, because the identity of the mail
+                                    server is no longer checked. Despite using a secured connection an attacker is able to
+                                    read and modify communication by performing a
+                                    <a href="https://en.wikipedia.org/wiki/Man-in-the-middle_attack">Man In The Middle Attack</a>.
+                                    <strong>An attacker can read you're username, password and messages</strong>.
+                                </p>
+                            </div>
+                            <div style="margin: 10px 0 0 0;">
+                                <fieldset class="group">
+                                    <legend><span>SSL</span></legend>
+                                    <div class="checkbox">
+                                        <input
+                                            class="checkbox"
+                                            type="checkbox"
+                                            name="checkboxTracker.checkCertificates"
+                                            id="mailConfiguration.checkCertificates"
+                                            value="true"
+                                            #if ($mailConfiguration.checkCertificates) checked="checked" #end
+                                        />
+                                        <label for="mailConfiguration.checkCertificates">Verify SSL certificates</label>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tabs-pane" id="tabs-senders">
+                        <div style="margin-top: 10px;">
+                            <h3>Senders</h3>
+                            <p>The plugin tries to use the senders mail address to identify a confluence user.
+                            To fight spamming you may choose a confluence group to restrict the acceppted senders addresses.</p>
+                            <p><strong>
+                                <span class="aui-icon aui-icon-small aui-iconfont-error confluence-information-macro-icon"></span>
+                                Warning: The sender address can be
+                                <a href="https://en.wikipedia.org/wiki/Email_spoofing">easily forged</a>,
+                                do not rely on this for security reasons.
+                            </strong></p>
+
+
+                            <div class="field-group">
+                                <label for="mailConfiguration.securityGroup">Group</label>
+                                <select id="mailConfiguration.securityGroup" name="mailConfiguration.securityGroup">
+                                    <option
+                                            value=""
+                                            #if($mailConfiguration.securityGroup == "")
+                                                selected="selected"
+                                            #end
+                                    >
+                                        -- Accept all mail addresses --
+                                    </option>
+                                    #foreach($group in $groups)
+                                        <option
+                                            value="${group}"
+                                            #if($group == $mailConfiguration.securityGroup)
+                                                selected="selected"
+                                            #end
+                                        >
+                                            ${group}
+                                        </option>
+                                    #end
+                                </select>
+                                <div class="description">Choose <strong>confluence-users</strong> to allow all registered users</div>
+                                #foreach ($error in $fieldErrors.get("mailConfiguration.securityGroup")) <div class="error">$error</div> #end
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="padding-top: 40px;">
+                <div class="buttons">
+                    <input class="button submit" type="submit" value="Save" id="confirm">
+                </div>
+            </div>
+
+            #form_xsrfToken()
+        </form>
+    </body>
+</html

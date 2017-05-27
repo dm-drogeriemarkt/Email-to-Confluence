@@ -1,0 +1,12 @@
+From: "Alice" <alice@example.org>
+Content-Type: text/plain;
+	charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Mime-Version: 1.0 (Mac OS X Mail 10.2 \(3259\))
+Subject: Hello
+X-Universally-Unique-Identifier: 6701BA04-B615-45CC-AEB4-87C49CF4D345
+Message-Id: <C6BCA206-6135-4ECE-B433-4C0BF347D6C7@dm.de>
+Date: Mon, 20 Mar 2017 11:43:09 +0100
+To: bob@example.org
+
+Hello World
