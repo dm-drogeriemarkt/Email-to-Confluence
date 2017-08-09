@@ -1,0 +1,2 @@
+ignore:
+  - **/*Exception.java

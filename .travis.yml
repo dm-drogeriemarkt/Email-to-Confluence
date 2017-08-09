@@ -1,0 +1,23 @@
+language: java
+
+jdk:
+  - oraclejdk8
+
+before_deploy:
+  - "rm target/mail2blog-*-tests.jar"
+
+deploy:
+  provider: releases
+  skip_cleanup: true
+  api_key:
+    secure: gDmncZ/VgVg79huJOPv43tWc41MuI5/rLekk6Cy2WCb8gT3PWSAcKMrswk2+TTE9rWTIwHPNTkwBIUv63H59K2umDd21aVppJNWJFcyUpaGGzhshW+x6m/FfIK5eYd7LOuH8ZqUaQP2YgrxJPxNzT4LJ9Fri3j4U7ew0DgXFMEov1pMFt1/6Yut1uZCwGgSYqdOFqCmZrNVY6RKQfbvG18lubqr/EtejhvC/CbVIDG+A3SGM/rWxkws5nNySl6kuMyMJzIiWrHdhF4v9TBZDL5LBdpXwj4CxGvbYXr4apsD1tb9x4Nop4ySQqA2OgxjtnXpGkSe+hrZA2ymqCi/90QHw8xIKAMezj0KdmrIYU3iPo2wx8mZVsjPyny/oB2Z4Pbh+H8t3g3M8kqR93qQSR4osKtxuDUqVpXZDYR0GSiBF7Xd5OKMXrtGzUjqWR6cTcayRK3tVbxu1JjFoU1t1287nIrV5ARWgD3jbknnV/Ot513Vn3qmDW4VqG5QC+lilC8eNx+e1EQZ7vhIhcb5tEz2sCcGjJX7XZ2VMmBys4pFvvkx+Ved/qYJoq9tM6BY2QZbaCsOfZegqhfpS4RITuKNBJjfU1AHqp5th7o4vNJU1gJQdNqwbdmS2u4l60O1td4q6nZogzKgpXl3suBEyPZjV1mpfEQCB4AX+l4zUXJI=
+  file_glob: true
+  file: target/mail2blog-*.jar
+  on:
+    repo: dm-drogeriemarkt/Mail2Blog
+    tags: true
+
+script: "mvn cobertura:cobertura"
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

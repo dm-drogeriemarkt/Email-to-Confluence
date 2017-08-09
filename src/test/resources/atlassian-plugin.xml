@@ -1,0 +1,21 @@
+<atlassian-plugin key="${project.groupId}.${project.artifactId}-tests" name="${project.name}" plugins-version="2">
+    <plugin-info>
+        <description>${project.description}</description>
+        <version>${project.version}</version>
+        <vendor name="${project.organization.name}" url="${project.organization.url}" />
+    </plugin-info>
+
+    <!-- from the product container -->
+    <component-import key="applicationProperties" interface="com.atlassian.sal.api.ApplicationProperties" />
+
+    <!-- from the mail2blog plugin -->
+    <component-import key="MailConfigurationManager" interface="de.dm.mail2blog.IMailConfigurationManager" />
+    <component-import key="Mail2BlogJob" interface="de.dm.mail2blog.IMail2BlogJob" />
+
+    <!-- Request factory -->
+    <component-import key="requestFactory" interface="com.atlassian.sal.api.net.RequestFactory" />
+
+    <component-import name="SAL Transaction Template" key="transactionTemplate">
+        <interface>com.atlassian.sal.api.transaction.TransactionTemplate</interface>
+    </component-import>
+</atlassian-plugin>

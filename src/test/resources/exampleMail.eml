@@ -1,0 +1,135 @@
+From: "Alice" <alice@example.org>
+To: "Bob" <bob@example.org>
+Subject: Test
+Date: Mon, 13 Mar 2017 09:54:39 +0000
+Message-ID: <0D4BE762-422F-4AC3-B4C2-BD861CB579C5@dm.de>
+Accept-Language: de-DE, en-US
+Content-Language: en-US
+Content-Type: multipart/related;
+	boundary="_004_0D4BE762422F4AC3B4C2BD861CB579C5dmde_";
+	type="multipart/alternative"
+MIME-Version: 1.0
+
+--_004_0D4BE762422F4AC3B4C2BD861CB579C5dmde_
+Content-Type: multipart/alternative;
+	boundary="_000_0D4BE762422F4AC3B4C2BD861CB579C5dmde_"
+
+--_000_0D4BE762422F4AC3B4C2BD861CB579C5dmde_
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+Lieber Bob,
+
+herzlich willkommen beim dm-Newsletter! Neuerscheinungen, Produkttests, exklusive Gewinnspiele, Beratung und vieles mehr – jetzt bekommen Sie alle Infos von dm direkt in Ihr Postfach.
+
+Mit Ihrer Anmeldung haben Sie automatisch an unserem Gewinnspiel teilgenommen, bei dem wir monatlich 50 dm-Produktboxen verlosen. Die Gewinner werden zufällig und innerhalb von vier Wochen nach Ende des jeweiligen Monats ausgelost und per Post benachrichtigt. Viel Glück!
+
+- ALANA
+- alverde
+- babylove
+- Balea
+
+Mit freundlichen Grüßen
+
+dm-drogerie markt
+
+--_000_0D4BE762422F4AC3B4C2BD861CB579C5dmde_
+Content-Type: text/html; charset="utf-8"
+Content-ID: <70110134E0D90A439BB7FF8F97855088@dm.de>
+Content-Transfer-Encoding: 8bit
+
+<p>Lieber Bob,</p>
+
+<p>
+herzlich willkommen beim dm-Newsletter! <strong>Neuerscheinungen, Produkttests, exklusive Gewinnspiele, Beratung</strong> und vieles mehr – jetzt bekommen Sie alle Infos von dm direkt in Ihr Postfach.
+</p>
+
+<p>
+Mit Ihrer Anmeldung haben Sie automatisch an unserem Gewinnspiel teilgenommen, bei dem wir monatlich 50 dm-Produktboxen verlosen. Die Gewinner werden zufällig und innerhalb von vier Wochen nach Ende des jeweiligen Monats ausgelost und per Post benachrichtigt. Viel Glück!
+</p>
+
+<p>
+<ul>
+    <li>ALANA</li>
+    <li>alverde</li>
+    <li>babylove</li>
+    <li>Balea</li>
+</ul>
+</p>
+
+<p>
+<table border="1">
+    <thead>
+        <tr>
+            <th>Produkt</th>
+            <th>Marke</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Servietten</td>
+            <td>Profissimo</td>
+        </tr>
+        <tr>
+            <td>WC-Papiersitze</td>
+            <td>Sanft&amp;Sicher</td>
+        </tr>
+    </tbody>
+</table>
+</p>
+
+<p>Mit freundlichen Grüßen</p>
+
+<p>dm-drogerie markt</p>
+
+--_000_0D4BE762422F4AC3B4C2BD861CB579C5dmde_--
+
+--_004_0D4BE762422F4AC3B4C2BD861CB579C5dmde_
+Content-Type: image/gif; name="dm-logo.gif"
+Content-Description: dm-logo.gif
+Content-Disposition: inline; filename="dm-logo.gif"; size=2400;
+	creation-date="Mon, 13 Mar 2017 09:54:39 GMT";
+	modification-date="Mon, 13 Mar 2017 09:54:39 GMT"
+Content-ID: <6FA75120-9E1A-45DE-9001-620110B831AD>
+Content-Transfer-Encoding: base64
+
+R0lGODlhWgA8AMQAAP///wAoeN0pHv7RXf/IL+dpW1Brov/hji9QkZuryvCemfGWYP/uwc/X5m2E
+suJKPfbFwhQ5g//44/rf3bG91ufr8oaZv+3w9tzh7PT2+f3w7//68/r7/P77+sPM3+/y9yH/C1hN
+UCBEYXRhWE1QPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtj
+OWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUg
+WE1QIENvcmUgNS4zLWMwMTEgNjYuMTQ1NjYxLCAyMDEyLzAyLzA2LTE0OjU2OjI3ICAgICAgICAi
+PiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5
+bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6
+Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29t
+L3hhcC8xLjAvbW0vIiB4bWxuczpzdFJlZj0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL3NU
+eXBlL1Jlc291cmNlUmVmIyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M2IChX
+aW5kb3dzKSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDoxMDYxN0UzRUYzQjgxMUU0QURFN0E0
+QTNFNDYyMEE5QSIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDoxMDYxN0UzRkYzQjgxMUU0QURF
+N0E0QTNFNDYyMEE5QSI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAu
+aWlkOjEwNjE3RTNDRjNCODExRTRBREU3QTRBM0U0NjIwQTlBIiBzdFJlZjpkb2N1bWVudElEPSJ4
+bXAuZGlkOjEwNjE3RTNERjNCODExRTRBREU3QTRBM0U0NjIwQTlBIi8+IDwvcmRmOkRlc2NyaXB0
+aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+Af/+/fz7+vn4
+9/b19PPy8fDv7u3s6+rp6Ofm5eTj4uHg397d3Nva2djX1tXU09LR0M/OzczLysnIx8bFxMPCwcC/
+vr28u7q5uLe2tbSzsrGwr66trKuqqainpqWko6KhoJ+enZybmpmYl5aVlJOSkZCPjo2Mi4qJiIeG
+hYSDgoGAf359fHt6eXh3dnV0c3JxcG9ubWxramloZ2ZlZGNiYWBfXl1cW1pZWFdWVVRTUlFQT05N
+TEtKSUhHRkVEQ0JBQD8+PTw7Ojk4NzY1NDMyMTAvLi0sKyopKCcmJSQjIiEgHx4dHBsaGRgXFhUU
+ExIREA8ODQwLCgkIBwYFBAMCAQAAIfkEAAAAAAAsAAAAAFoAPAAABf8gII5kaZ5oqq5s676A5xgI
+EgU4bsB876OOnDDn+BmPL8NwSEE6n6bbMoeBWp2YaS5y7RozDUoiOER4z0bKsohuwyzLhHveUg4b
+9HwKseTo/yQfS2aAbg0WNBGKfENFYB5iFg6Tk3gAHAmJEQaWgYiLBh5zmIxaQnJwplUeUkwkCa2n
+bQ2lpkKidlNcaloRfgBkWhVnCbZaGQC1jR7GosFacl3FxoMAF7awxgm8tmxWzFoIiUs7GDPKAZvU
+2cbeTx+xOQZVItNCFiUNQ7Gb8QG14qa4c/KMSIlcOZq8MoVgGLcp+AAgxBHtSYUpO0r4G0aiYI6G
+IvRpiQhsiSgoqYb/cBwBTgiXEuhwdHooJKOIiQFWOkE3sOQQmyP8BSAJIKVLnfFePhE5hN4IeEuI
+Asgy6NdNiCQyVINi76MJowlL0MShcAQ6XySYGoTiceAFoU5FgP1nAuvCIVKPoCsrwmM6EzilUh1y
+oYTHk0/8IY6hBaiIjWLJAV6iE4k/px9iBhh4sczXOCaUKX0yxRIHnDkqihibF2fcS1uhYL2AOkcn
+uUv4ihBtQi2OnkeE2qjZ5yDlup4j472iueZEQiR4lxi8lsRc3Uj8uqT+u4SgnyZYT256xfc+DGNV
+M15e4nrofV5qI6hyuH3u8UJec4htJQNOBx/stgQyJLj2nksmcLcZ/xqHTJKATh9EKGGAJWQwYYQn
+XIhhCRxoSGAbG2wggQQMSMCCBhrQMQEECihQwAMQwEAiAwccMMCNBOSo444D1MjABiZ0oMADDxTQ
+IgQQTJDiCxtosCKLLr4owJRUCvCAChvQaOOOXHbppY49mjjCBAVUWSWRaBag5otomunmm1PGWAKN
+A3xp551eHvCjCBCUCeefgAZaAAkM4GnooVwOUCIAfQbq6KNTLinCAYhWiqiiGzQK6aZuyilmnZby
+2GONNoKKqJ5kcqqqAAsAUKgIhVba46IpkLjloXousCqkBVBKwAiHLuDnlEQWsMCRkpKQpal39jjk
+rn8WsOMIvnopLMynRSoAAZAjLHvojcNCK0ABzP46gYtdDqCruMQuIKcIElRrqLq7LlBujsPuuMAD
+7L5ZwATK3nqpsPy+WaS9d0JA5QIErNvvnwsk6+q9slJ8JwAKEPvwozCawIDFoR4qgsP9FrvmyURS
++a/HIIdspwgdFIytkUlKjEIHK7qoQAcsu3zpmBwbOQHPSDSJwsc+4zkACRnDKXQhSCedJwkxm2mk
+zYBkKbDUB5TQ9AMKAFwIC1lqieOlB4g5JoxEj/1DByMyIPfcc6vt9t0khAAAOw==
+
+--_004_0D4BE762422F4AC3B4C2BD861CB579C5dmde_--

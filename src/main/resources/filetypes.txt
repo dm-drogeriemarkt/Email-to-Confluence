@@ -1,0 +1,16 @@
+jpg     image/jpeg
+jpeg    image/jpeg
+gif     image/gif
+png     image/png
+ico     image/vnd.microsoft.icon
+mp3     audio/mpeg
+ogg     audio/ogg
+wav     audio/wav
+webm    video/webm
+ogv     video/ogg
+mp4     video/mp4
+pdf     application/pdf
+docx    application/vnd.openxmlformats-officedocument.wordprocessingml.document
+xlsx    application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+pptx    application/vnd.openxmlformats-officedocument.presentationml.presentation
+txt     text/plain
