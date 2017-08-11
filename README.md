@@ -1,7 +1,11 @@
-# Mail2Blog
+<h1 align="center">Mail2Blog</h1>
 
-[![Build Status](https://travis-ci.org/dm-drogeriemarkt/Mail2Blog.svg?branch=master)](https://travis-ci.org/dm-drogeriemarkt/Mail2Blog)
-[![Codecov](https://img.shields.io/codecov/c/github/dm-drogeriemarkt/Mail2Blog.svg)](https://codecov.io/gh/dm-drogeriemarkt/Mail2Blog)
+<p align="center">
+    <img src="doc/mail2blog-logo.jpg" alt="Logo" width="33%">
+    <br>
+    <a href="https://travis-ci.org/dm-drogeriemarkt/Mail2Blog"><img src="https://travis-ci.org/dm-drogeriemarkt/Mail2Blog.svg?branch=master" alt="Build Status"></a>
+    <a href="https://codecov.io/gh/dm-drogeriemarkt/Mail2Blog"><img src="https://img.shields.io/codecov/c/github/dm-drogeriemarkt/Mail2Blog.svg" alt="Build Status"></a>
+</p>
 
 A Confluence plugin that converts emails to confluence blog posts.
 
