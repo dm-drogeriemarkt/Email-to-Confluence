@@ -22,7 +22,9 @@ A Confluence plugin that converts emails to confluence blog posts.
 
 ## First Steps
 
-Installation:
+This add-on is available on the [Atlassian Marketplace](https://marketplace.atlassian.com/plugins/de.dm.mail2blog.mail2blog/server/overview).
+
+Manual Installation:
 
 1. Download the latest release from the release tab.
 2. [Install the plug-in by uploading it to your Confluence instance](https://confluence.atlassian.com/upm/installing-add-ons-273875715.html#Installingadd-ons-Installingbyfileupload).
@@ -44,6 +46,7 @@ The advanced configuration options are explained [here](doc/advanced_configurati
 - [Advanced Configuration](doc/advanced_configuration.md)
 - [Technical Documentation](doc/technical_documentation.md)
 - [FAQ](doc/faq.md)
+- [Konzeption und Entwicklung des Confluence-Add-ons Mail2Blog (German)](doc/konzeption_und_entwicklung_des_confluence_add_ons_mail2blog.pdf)
 - [Code Of Conduct](CODE_OF_CONDUCT.md)
 - [License](LICENSE.txt)
 

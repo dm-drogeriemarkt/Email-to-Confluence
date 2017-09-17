@@ -1,5 +1,7 @@
 ## Technical Documentation
 
+Further information, **in German**, on the code structure of this project is available [here](konzeption_und_entwicklung_des_confluence_add_ons_mail2blog.pdf).
+
 ## Compiling
 
 Download and install the [atlassian SDK](https://developer.atlassian.com/docs/getting-started/downloads).
@@ -23,9 +25,9 @@ When using IMAP the plugin will move the message into a folder called Processed
 after successfully handling the message, in case of an error the message is moved into a folder called Invalid.
 When using POP3 the message gets deleted, because POP3 doesn't support folders.
 
-![Process](workflow_confluence_to_mail.png)
+![Process](workflow_confluence_to_mail.jpg)
 
-![Process with Classes](workflow_with_classes.png)
+![Class Diagram](classdiagram.jpg)
 
 ## The Configuration Process
 
@@ -37,5 +39,4 @@ that an incorrect state during form validation isn't used to process messages. T
 workaround for the [issue](https://answers.atlassian.com/questions/120352/check-box-in-velocity) that checkboxes
 only submit a value when getting checked and not when getting unchecked.
 
-![Process](workflow_configuration.png)
-
+![Class Diagram](configuration-classdiagram.jpg)

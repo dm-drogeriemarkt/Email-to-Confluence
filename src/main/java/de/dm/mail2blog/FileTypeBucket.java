@@ -91,7 +91,7 @@ public class FileTypeBucket {
     }
 
     /**
-     * Removes potentially dangerous characters from  given file name
+     * Removes potentially dangerous characters from given file name
      * and check that the file extension matches the given mimeType.
      * If not it appends a matching extension.
      *
