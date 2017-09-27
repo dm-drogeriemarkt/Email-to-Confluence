@@ -67,10 +67,22 @@ $webResourceManager.requireResource("com.atlassian.auiplugin:aui-select2")
                 </strong>
             </div>
             <div class="help-panel-content">
-                <ul>
-                    <li><a href="https://github.com/dm-drogeriemarkt/Mail2Blog">Documentation</a></li>
-                    <li><a href="https://github.com/dm-drogeriemarkt/Mail2Blog">Source Code</a></li>
-                </ul>
+                <p>
+                    Useful links:
+                    <ul style="margin-top:0">
+                        <li><a href="https://marketplace.atlassian.com/plugins/de.dm.mail2blog.mail2blog/server/overview">Atlassian Marketplace</a></li>
+                        <li><a href="https://github.com/dm-drogeriemarkt/Mail2Blog">Documentation</a></li>
+                        <li><a href="https://github.com/dm-drogeriemarkt/Mail2Blog/issues">Issue Reporting</a></li>
+                        <li><a href="https://github.com/dm-drogeriemarkt/Mail2Blog">Source Code</a></li>
+                    </ul>
+                </p>
+                <p>
+                    If you like this add-on please star it on GitHub and leave a review on the Marketplace:
+                    <ul style="margin-top:0">
+                        <li><a class="github-button" href="https://github.com/dm-drogeriemarkt/Mail2Blog" aria-label="Star dm-drogeriemarkt/Mail2Blog on GitHub">Star</a></li>
+                        <li><a href="https://marketplace.atlassian.com/plugins/de.dm.mail2blog.mail2blog/server/reviews">Write a review</a></li>
+                    </ul>
+                </p>
             </div>
         </div>
 
@@ -605,5 +617,7 @@ $webResourceManager.requireResource("com.atlassian.auiplugin:aui-select2")
 
             #form_xsrfToken()
         </form>
+
+        <script async defer src="https://buttons.github.io/buttons.js"></script>
     </body>
 </html
