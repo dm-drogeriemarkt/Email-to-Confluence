@@ -3,6 +3,7 @@ package ut.de.dm.mail2blog;
 import com.atlassian.confluence.pages.Attachment;
 import com.atlassian.confluence.setup.settings.Settings;
 import com.atlassian.confluence.setup.settings.SettingsManager;
+import com.atlassian.confluence.user.ConfluenceUser;
 import com.atlassian.confluence.user.UserAccessor;
 import com.atlassian.spring.container.ContainerManager;
 import com.atlassian.user.User;
@@ -50,6 +51,7 @@ public class MessageParserTest
     @Mock SearchResult searchResult;
     @Mock Pager pager;
     @Mock User user;
+    @Mock ConfluenceUser confluenceUser;
 
     private MessageParser messageParser;
 
@@ -229,14 +231,17 @@ public class MessageParserTest
 
     /**
      * Test getting the user from a mail message.
+     *
+     * Assuming userAccessor will return a ConfluenceUser. See:
+     * https://github.com/dm-drogeriemarkt/Mail2Blog/issues/2
      */
     @Test
-    public void testGetUser() throws Exception
+    public void testGetUserWithConfluenceUser() throws Exception
     {
         when(userAccessor.getUsersByEmail("alice@example.org")).thenReturn(searchResult);
         when(searchResult.pager()).thenReturn(pager);
         List<User> users = new ArrayList<User>();
-        users.add(user);
+        users.add(confluenceUser);
         when(pager.getCurrentPage()).thenReturn(users);
 
          MailConfiguration mailConfiguration = MailConfiguration.builder()
@@ -247,11 +252,43 @@ public class MessageParserTest
         messageParser.setSettingsManager(settingsManager);
         messageParser.setUserAccessor(userAccessor);
 
-        assertEquals("Failed to get user", user, messageParser.getSender());
+        assertEquals("Failed to get user", confluenceUser, messageParser.getSender());
+    }
+
+    /**
+     * Test getting the user from a mail message.
+     *
+     * Assuming userAccessor will return a ConfluenceUser. See:
+     * https://github.com/dm-drogeriemarkt/Mail2Blog/issues/2
+     */
+    @Test
+    public void testGetUserWithUser() throws Exception
+    {
+        when(userAccessor.getUsersByEmail("alice@example.org")).thenReturn(searchResult);
+        when(searchResult.pager()).thenReturn(pager);
+        List<User> users = new ArrayList<User>();
+        users.add(user);
+        when(pager.getCurrentPage()).thenReturn(users);
+
+        when(user.getName()).thenReturn("alice");
+        when(userAccessor.getUserByName("alice")).thenReturn(confluenceUser);
+
+         MailConfiguration mailConfiguration = MailConfiguration.builder()
+        .maxAllowedAttachmentSize(0)
+        .build();
+
+        MessageParser messageParser = new MessageParser(exampleMessage, new MailConfigurationWrapper(mailConfiguration));
+        messageParser.setSettingsManager(settingsManager);
+        messageParser.setUserAccessor(userAccessor);
+
+        assertEquals("Failed to get user", confluenceUser, messageParser.getSender());
     }
 
     /**
      * Test getting an unknown user from a mail message.
+     *
+     * Assuming userAccessor will return a general User. See:
+     * https://github.com/dm-drogeriemarkt/Mail2Blog/issues/2
      */
     @Test
     public void testGetUserUnknown() throws Exception

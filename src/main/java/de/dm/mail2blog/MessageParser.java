@@ -1,5 +1,6 @@
 package de.dm.mail2blog;
 
+import com.atlassian.confluence.user.ConfluenceUser;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import static org.apache.commons.lang.StringEscapeUtils.escapeHtml;
@@ -48,7 +49,7 @@ public class MessageParser {
      *
      * @return the Confluence or null if no user could be identified.
      */
-    public User getSender()
+    public ConfluenceUser getSender()
     {
         // Extract sender mail address.
         // Or return anonymous user if it fails.
@@ -91,8 +92,16 @@ public class MessageParser {
             return null;
         }
 
-        // Found a matching user for the email address of the sender.
-        return (User) page.get(0);
+        // In recent confluence versions userAccessor.getUsersByEmail sometimes doesn't
+        // seem to return ConfluenceUsers. In this case try to load the confluence user
+        // from the userAccessor via the username.
+        // Issue: https://github.com/dm-drogeriemarkt/Mail2Blog/issues/2.
+        if (page.get(0) instanceof ConfluenceUser)  {
+            return (ConfluenceUser)page.get(0);
+        } else {
+            String username = ((User)page.get(0)).getName();
+            return userAccessor.getUserByName(username);
+        }
     }
 
     /**
