@@ -22,9 +22,11 @@
     <component key="MailConfigurationManager" class="de.dm.mail2blog.MailConfigurationManager" public="true">
         <interface>de.dm.mail2blog.IMailConfigurationManager</interface>
     </component>
+    <component key="GlobalState" class="de.dm.mail2blog.GlobalState" public="true">
+        <interface>de.dm.mail2blog.IGlobalState</interface>
+    </component>
     <component key="ConfigurationActionState" class="de.dm.mail2blog.actions.ConfigurationActionState"></component>
     <component key="CheckboxTracker" class="de.dm.mail2blog.actions.CheckboxTracker"></component>
-    <component key="GlobalState" class="de.dm.mail2blog.GlobalState"></component>
 
     <web-item key="mail2blog-admin-link" name="Mail2Blog" section="system.admin/configuration" weight="1000">
         <description>Link to the Mail2Blog configuration page</description>

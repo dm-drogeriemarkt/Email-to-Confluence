@@ -5,7 +5,7 @@ import lombok.*;
 /**
  * Autowired bean that stores the plugin wide state.
  */
-public class GlobalState {
+public class GlobalState implements IGlobalState {
 
     // Auto wired components.
     @Setter private MailConfigurationManager mailConfigurationManager;

@@ -10,6 +10,7 @@
 
     <!-- from the mail2blog plugin -->
     <component-import key="MailConfigurationManager" interface="de.dm.mail2blog.IMailConfigurationManager" />
+    <component-import key="GlobalState" interface="de.dm.mail2blog.IGlobalState" />
     <component-import key="Mail2BlogJob" interface="de.dm.mail2blog.IMail2BlogJob" />
 
     <!-- Request factory -->

@@ -268,8 +268,8 @@
         </snapshotRepository>
     </distributionManagement>
     <properties>
-        <confluence.version>6.4.1</confluence.version>
-        <confluence.data.version>6.4.1</confluence.data.version>
+        <confluence.version>6.6.0</confluence.version>
+        <confluence.data.version>6.6.0</confluence.data.version>
         <amps.version>6.2.11</amps.version>
         <powermock.version>1.7.0</powermock.version>
         <junit.version>4.12</junit.version>

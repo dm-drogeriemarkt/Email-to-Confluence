@@ -9,6 +9,7 @@ import com.atlassian.plugins.osgi.test.AtlassianPluginsTestRunner;
 import com.atlassian.user.User;
 import com.atlassian.user.impl.DefaultUser;
 import com.atlassian.user.security.password.Credential;
+import de.dm.mail2blog.IGlobalState;
 import de.dm.mail2blog.IMail2BlogJob;
 import de.dm.mail2blog.IMailConfigurationManager;
 import de.dm.mail2blog.MailConfiguration;
@@ -52,6 +53,7 @@ public class IntegrationTest
     @NonNull @Setter private UserAccessor userAccessor;
     @NonNull @Setter private IMail2BlogJob mail2BlogJob;
     @NonNull @Setter private PageManager pageManager;
+    @NonNull @Setter private IGlobalState globalState;
 
     /**
      * Generate the mail configuration.
@@ -180,6 +182,9 @@ public class IntegrationTest
         try {
             // Save the configuration
             mailConfigurationManager.saveConfig(mailConfiguration);
+
+            // Reset global state, so that config gets fetched from disk.
+            globalState.setMailConfigurationWrapper(null);
 
             // Run job
             mail2BlogJob.runJob(null);
