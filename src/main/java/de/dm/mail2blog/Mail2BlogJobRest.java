@@ -2,6 +2,7 @@ package de.dm.mail2blog;
 
 import com.atlassian.scheduler.JobRunnerResponse;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -14,9 +15,8 @@ import javax.ws.rs.core.Response;
  */
 @Path("/runner")
 public class Mail2BlogJobRest {
-
     // Autowired
-    @Setter IMail2BlogJob mail2BlogJob;
+    @Setter @Autowired private Mail2BlogJob mail2BlogJob;
 
     @GET
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})

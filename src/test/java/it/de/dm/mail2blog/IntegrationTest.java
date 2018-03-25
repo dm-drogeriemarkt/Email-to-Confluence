@@ -1,26 +1,15 @@
 package it.de.dm.mail2blog;
 
 import com.atlassian.confluence.pages.BlogPost;
-import com.atlassian.confluence.pages.PageManager;
 import com.atlassian.confluence.spaces.Space;
-import com.atlassian.confluence.spaces.SpaceManager;
-import com.atlassian.confluence.user.UserAccessor;
-import com.atlassian.plugins.osgi.test.AtlassianPluginsTestRunner;
 import com.atlassian.user.User;
 import com.atlassian.user.impl.DefaultUser;
 import com.atlassian.user.security.password.Credential;
-import de.dm.mail2blog.IGlobalState;
-import de.dm.mail2blog.IMail2BlogJob;
-import de.dm.mail2blog.IMailConfigurationManager;
 import de.dm.mail2blog.MailConfiguration;
+import de.dm.mail2blog.StaticAccessor;
 import de.saly.javamail.mock2.MailboxFolder;
 import de.saly.javamail.mock2.MockMailbox;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.mail.internet.MimeMessage;
 import java.io.InputStream;
@@ -31,10 +20,10 @@ import static org.junit.Assert.*;
 /**
  * Create a mailbox with messages and trigger the Mail2Blog job.
  * Then look if all messages have been successfully processed.
- * Uses the wired test interface by atlassian which runs a new confluence instance in the background.
+ *
+ * The wired test framework just failed to work too many times so instead use the rest api for testing.
  */
-@RunWith(AtlassianPluginsTestRunner.class)
-@RequiredArgsConstructor
+@Slf4j
 public class IntegrationTest
 {
     MailConfiguration mailConfiguration;
@@ -46,14 +35,6 @@ public class IntegrationTest
     private static final String SPACE_KEY = "testMail2blog";
     private static final String USERNAME = "testMail2blog";
     private static final String EMAIL = "bob@example.org";
-
-    // Auto wired components.
-    @NonNull @Setter private IMailConfigurationManager mailConfigurationManager;
-    @NonNull @Setter private SpaceManager spaceManager;
-    @NonNull @Setter private UserAccessor userAccessor;
-    @NonNull @Setter private IMail2BlogJob mail2BlogJob;
-    @NonNull @Setter private PageManager pageManager;
-    @NonNull @Setter private IGlobalState globalState;
 
     /**
      * Generate the mail configuration.
@@ -100,14 +81,14 @@ public class IntegrationTest
      * Create a test user.
      */
     private void setUpUser() throws Exception {
-        user = userAccessor.getUserByName(USERNAME);
+        user = StaticAccessor.getUserAccessor().getUser(USERNAME);
         tearDownUser();
         if (user == null) {
-            user = userAccessor.createUser(
+            user = StaticAccessor.getUserAccessor().createUser(
                     new DefaultUser(USERNAME, USERNAME, EMAIL),
                     Credential.unencrypted("password")
             );
-            userAccessor.saveUser(user);
+            StaticAccessor.getUserAccessor().saveUser(user);
         }
     }
 
@@ -115,8 +96,8 @@ public class IntegrationTest
      * Remove test user.
      */
     private void tearDownUser() throws Exception {
-        if (user != null && userAccessor.isUserRemovable(user)) {
-            userAccessor.removeUser(user);
+        if (user != null && StaticAccessor.getUserAccessor().isUserRemovable(user)) {
+            StaticAccessor.getUserAccessor().removeUser(user);
             user = null;
         }
     }
@@ -125,11 +106,11 @@ public class IntegrationTest
      * Create the test space.
      */
     private void setUpSpace() throws Exception {
-        space = spaceManager.getSpace(SPACE_KEY);
+        space = StaticAccessor.getSpaceManager().getSpace(SPACE_KEY);
         tearDownSpace();
         if (space == null) {
-            space = spaceManager.createSpace(SPACE_KEY, SPACE_KEY, "Mail2Blog Test Space", user);
-            spaceManager.saveSpace(space);
+            space = StaticAccessor.getSpaceManager().createSpace(SPACE_KEY, SPACE_KEY, "Mail2Blog Test Space", user);
+            StaticAccessor.getSpaceManager().saveSpace(space);
         }
     }
 
@@ -139,13 +120,13 @@ public class IntegrationTest
     private void tearDownSpace() {
         if (space != null) {
             List test = space.getPageTemplates();
-            spaceManager.removeSpace(space);
+            StaticAccessor.getSpaceManager().removeSpace(space);
             space = null;
         }
     }
 
     public void validateBlogPosts() throws Exception {
-        List<BlogPost> blogPosts = pageManager.getBlogPosts(space, false);
+        List<BlogPost> blogPosts = StaticAccessor.getPageManager().getBlogPosts(space, false);
         assertEquals("Expected 2 blog posts", 2, blogPosts.size());
 
         BlogPost post1 = blogPosts.get(0);
@@ -164,30 +145,24 @@ public class IntegrationTest
         assertEquals("Not all messages ended up in the processed folder.", MESSAGE_COUNT, processed.getMessageCount());
     }
 
-    @Before
     public void setUp() throws Exception {
-        try {
-            setUpMailbox();
-            setUpConfiguration();
-            setUpUser();
-            setUpSpace();
-        } catch (Exception e) {
-            fail("Exception in setUp(): " + e.getMessage());
-        }
+        setUpMailbox();
+        setUpConfiguration();
+        setUpUser();
+        setUpSpace();
     }
 
-    @Test
     public void testProcess() throws Exception
     {
         try {
             // Save the configuration
-            mailConfigurationManager.saveConfig(mailConfiguration);
+            StaticAccessor.getMailConfigurationManager().saveConfig(mailConfiguration);
 
             // Reset global state, so that config gets fetched from disk.
-            globalState.setMailConfigurationWrapper(null);
+            StaticAccessor.getGlobalState().setMailConfigurationWrapper(null);
 
             // Run job
-            mail2BlogJob.runJob(null);
+            StaticAccessor.getMail2BlogJob().runJob(null);
 
             validateBlogPosts();
             validateMailbox();

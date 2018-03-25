@@ -6,27 +6,12 @@
         <param name="configure.url">/admin/plugins/mail2blog/configuration.action</param>
     </plugin-info>
 
-    <component key="Mail2BlogJob" class="de.dm.mail2blog.Mail2BlogJob" public="true">
-        <interface>de.dm.mail2blog.IMail2BlogJob</interface>
-    </component>
-
-    <job-config name="Mail to Blog" key="mail2blog-trigger">
-        <job key="Mail2BlogJob" perClusterJob="true" />
+    <job-config name="Mail to Blog" key="mail2blogTrigger">
+        <job key="mail2BlogJob" perClusterJob="true" />
         <description>Mail2Blog</description>
         <schedule cron-expression="0 0/5 * * * ?" jitterSecs="60"/>
         <managed editable="true" keepingHistory="true" canRunAdhoc="true" canDisable="true"/>
     </job-config>
-
-    <component-import key="pluginSettingsFactory" interface="com.atlassian.sal.api.pluginsettings.PluginSettingsFactory" />
-
-    <component key="MailConfigurationManager" class="de.dm.mail2blog.MailConfigurationManager" public="true">
-        <interface>de.dm.mail2blog.IMailConfigurationManager</interface>
-    </component>
-    <component key="GlobalState" class="de.dm.mail2blog.GlobalState" public="true">
-        <interface>de.dm.mail2blog.IGlobalState</interface>
-    </component>
-    <component key="ConfigurationActionState" class="de.dm.mail2blog.actions.ConfigurationActionState"></component>
-    <component key="CheckboxTracker" class="de.dm.mail2blog.actions.CheckboxTracker"></component>
 
     <web-item key="mail2blog-admin-link" name="Mail2Blog" section="system.admin/configuration" weight="1000">
         <description>Link to the Mail2Blog configuration page</description>
@@ -40,11 +25,11 @@
          <package name="mail2blog" extends="default" namespace="/admin/plugins/mail2blog">
             <default-interceptor-ref name="defaultStack" />
 
-            <action name="configuration" class="de.dm.mail2blog.actions.ConfigurationAction" method="doDefault" roles-required="admin">
+            <action name="configuration" class="de.dm.mail2blog.ConfigurationAction" method="doDefault" roles-required="admin">
                 <result name="input" type="velocity">/templates/extra/mail2blog/configuration.vm</result>
             </action>
 
-            <action name="doConfiguration" class="de.dm.mail2blog.actions.ConfigurationAction" roles-required="admin">
+            <action name="doConfiguration" class="de.dm.mail2blog.ConfigurationAction" roles-required="admin">
                 <interceptor-ref name="validatingStack" />
                 <param name="RequireSecurityToken">true</param>
                 <result name="input" type="velocity">/templates/extra/mail2blog/configuration.vm</result>
@@ -52,14 +37,9 @@
                 <result name="error" type="velocity">/templates/extra/mail2blog/configuration.vm</result>
             </action>
         </package>
-
     </xwork>
 
     <rest key="Mail2BlogRun" path="/mail2blog" version="1.0">
         <description>Run mail2blog job</description>
     </rest>
-
-    <component-import name="SAL Transaction Template" key="transactionTemplate">
-        <interface>com.atlassian.sal.api.transaction.TransactionTemplate</interface>
-    </component-import>
 </atlassian-plugin>

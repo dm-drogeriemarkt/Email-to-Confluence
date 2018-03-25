@@ -3,6 +3,7 @@ package de.dm.mail2blog;
 import com.atlassian.confluence.pages.Attachment;
 import lombok.Data;
 import lombok.ToString;
+
 import java.io.InputStream;
 
 /**

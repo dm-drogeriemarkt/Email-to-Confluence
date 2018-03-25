@@ -1,15 +1,16 @@
-package de.dm.mail2blog.actions;
+package de.dm.mail2blog;
 
-import de.dm.mail2blog.GlobalState;
-import de.dm.mail2blog.MailConfigurationWrapper;
-import lombok.*;
+import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Autowired bean that stores the mailConfiguration currently used in the settings form.
  */
+@Component
 public class ConfigurationActionState {
     // Autowired objects.
-    @Setter GlobalState globalState;
+    @Setter @Autowired GlobalState globalState;
 
     @Setter MailConfigurationWrapper mailConfigurationWrapper;
 

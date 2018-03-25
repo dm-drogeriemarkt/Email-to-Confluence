@@ -2,10 +2,14 @@ package de.dm.mail2blog;
 
 import com.atlassian.xwork.ParameterSafe;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.annotation.*;
-import lombok.*;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NonNull;
 
-import java.util.*;
+import java.util.Scanner;
 
 /**
  * Bean that stores the mail configuration.
@@ -33,15 +37,19 @@ public class MailConfiguration {
     // The html macro must be enabled.
     @NonNull private boolean htmlmacro;
 
-    // Whether to look for a space key in the address (used to be the only option till version 2.x).
+    // Included for backwords compability with v1, got replaced with spaceRules.
     @NonNull private boolean spaceKeyInAddress;
-
-    // Whether to detect the space key in the subject line.
     @NonNull private boolean spaceKeyInSubject;
+
+    @NonNull private SpaceRule[] spaceRules;
 
     // List of preferred content types to use.
     // There are preferred in the order of the list.
     @NonNull private String[] preferredContentTypes;
+
+    // To prevent data loss of users. The configuration page normally displays
+    // a warning pop up to users, when they use POP3. This popup can be disabled with this flag.
+    @NonNull private boolean doNotShowPop3Confirmation = false;
 
     // The rules to use to filter HTML in mails.
     // The plugin uses the owasp.html framework to filter html.
@@ -89,7 +97,8 @@ public class MailConfiguration {
         private boolean htmlmacro = false;
         private boolean spaceKeyInAddress = false;
         private boolean spaceKeyInSubject = false;
-        private String[] preferredContentTypes = new String[]{"text/html"};
+        private SpaceRule[] spaceRules = new SpaceRule[]{};
+        private String[] preferredContentTypes = new String[]{"text/html", "application/xhtml+xml", "text/plain"};
         private boolean htmlFilterFormatting = true;
         private boolean htmlFilterBlocks = true;
         private boolean htmlFilterImages = true;

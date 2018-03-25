@@ -1,6 +1,6 @@
 package de.dm.mail2blog;
 
-import lombok.*;
+import lombok.Setter;
 
 /**
  * Wrapper around a mail configuration bean, that provides additional methods and
@@ -11,7 +11,7 @@ public class MailConfigurationWrapper {
     /**
      * The actual mail configuration being wrapped.
      */
-    @Getter @Setter MailConfiguration mailConfiguration;
+    @Setter MailConfiguration mailConfiguration;
 
     /**
      * A file type bucket created from mailConfiguration.allowedFileTypes.
@@ -55,4 +55,8 @@ public class MailConfigurationWrapper {
         mailConfiguration.setAllowedFileTypes(fileTypeBucket.toString());
     }
 
+    public MailConfiguration getMailConfiguration() {
+        UpgradeMailConfiguration.upgradeMailConfiguration(mailConfiguration);
+        return mailConfiguration;
+    }
 }

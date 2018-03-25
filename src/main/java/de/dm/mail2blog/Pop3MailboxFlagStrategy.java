@@ -1,8 +1,11 @@
 package de.dm.mail2blog;
 
-import javax.mail.*;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
-import lombok.*;
+import javax.mail.Flags;
+import javax.mail.Message;
+import javax.mail.MessagingException;
 
 /**
  * Strategy to flag messages as processed and invalid on POP3 mailboxes.

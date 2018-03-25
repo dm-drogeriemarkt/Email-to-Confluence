@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0" y="0" width="144" height="144" viewBox="0, 0, 144, 144">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" x="0" y="0" width="144" height="144" viewBox="0, 0, 144, 144">
   <defs>
     <clipPath id="Clip_1">
       <path d="M8,0 L136,0 C140.418,0 144,3.582 144,8 L144,136 C144,140.418 140.418,144 136,144 L8,144 C3.582,144 0,140.418 0,136 L0,8 C0,3.582 3.582,0 8,0 z"/>

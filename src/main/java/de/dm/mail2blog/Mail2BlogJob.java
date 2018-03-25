@@ -1,24 +1,29 @@
 package de.dm.mail2blog;
 
+import com.atlassian.plugin.spring.scanner.annotation.export.ExportAsService;
 import com.atlassian.sal.api.transaction.TransactionTemplate;
 import com.atlassian.scheduler.JobRunner;
 import com.atlassian.scheduler.JobRunnerRequest;
 import com.atlassian.scheduler.JobRunnerResponse;
-import lombok.*;
+import lombok.Cleanup;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.mail.Message;
 
 /**
- * The job triggered by confluence that polls for new messages
- * and creates blog posts.
+ * The job triggered by confluence that polls for new messages and creates blog posts.
  */
 @Slf4j
-public class Mail2BlogJob implements JobRunner, IMail2BlogJob
+@Component
+@ExportAsService
+public class Mail2BlogJob implements JobRunner
 {
     // Auto wired components.
-    @Setter TransactionTemplate transactionTemplate;
-    @Setter GlobalState globalState;
+    @Setter @Autowired          private GlobalState globalState;
+    @Setter @Autowired          private SpaceKeyExtractor spaceKeyExtractor;
 
     /**
      * The main method of this job.
@@ -27,17 +32,17 @@ public class Mail2BlogJob implements JobRunner, IMail2BlogJob
     public JobRunnerResponse runJob(JobRunnerRequest jobRunnerRequest) {
         log.info("Mail2Blog: Executing job");
 
-        if ("true".equals(System.getProperty("atlassian.mail.fetchdisabled"))) {
+        if ("true".equals(systemGetProperty("atlassian.mail.fetchdisabled"))) {
             return JobRunnerResponse.aborted("Aborting because of atlassian.mail.fetchdisabled=true.");
         }
 
-        if ("true".equals(System.getProperty("atlassian.mail.popdisabled"))) {
+        if ("true".equals(systemGetProperty("atlassian.mail.popdisabled"))) {
             return JobRunnerResponse.aborted("Aborting because of atlassian.mail.popdisabled=true.");
         }
 
         try {
             MailConfigurationWrapper mailConfigurationWrapper = globalState.getMailConfigurationWrapper();
-            @Cleanup Mailbox mailbox = new Mailbox(mailConfigurationWrapper);
+            @Cleanup Mailbox mailbox = newMailbox(mailConfigurationWrapper);
 
             // Go through all messages in the INBOX.
             // Processed messages get deleted or moved into different folders.
@@ -49,11 +54,12 @@ public class Mail2BlogJob implements JobRunner, IMail2BlogJob
 
                 // Process message.
                 MessageTransaction transaction = MessageTransaction.builder()
+                .spaceKeyExtractor(spaceKeyExtractor)
                 .mailConfigurationWrapper(mailConfigurationWrapper)
                 .mailbox(mailbox)
                 .message(message)
                 .build();
-                transactionTemplate.execute(transaction);
+                getTransactionTemplate().execute(transaction);
             }
         } catch (Exception e) {
             log.error("Mail2Blog: " + e.getMessage(), e);
@@ -61,5 +67,17 @@ public class Mail2BlogJob implements JobRunner, IMail2BlogJob
         }
 
         return JobRunnerResponse.success();
+    }
+
+    public TransactionTemplate getTransactionTemplate() {
+        return StaticAccessor.getTransactionTemplate();
+    }
+
+    public Mailbox newMailbox(MailConfigurationWrapper mailConfigurationWrapper) throws MailboxException{
+        return new Mailbox(mailConfigurationWrapper);
+    }
+
+    public String systemGetProperty(String key) {
+        return System.getProperty(key);
     }
 }

@@ -3,8 +3,11 @@ package de.dm.mail2blog;
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map.Entry;
+import java.util.Scanner;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

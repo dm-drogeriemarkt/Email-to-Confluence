@@ -5,7 +5,6 @@ import com.atlassian.confluence.setup.settings.Settings;
 import com.atlassian.confluence.setup.settings.SettingsManager;
 import com.atlassian.confluence.user.ConfluenceUser;
 import com.atlassian.confluence.user.UserAccessor;
-import com.atlassian.spring.container.ContainerManager;
 import com.atlassian.user.User;
 import com.atlassian.user.search.SearchResult;
 import com.atlassian.user.search.page.Pager;
@@ -18,10 +17,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.slf4j.LoggerFactory;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.mail.Message;
 import javax.mail.internet.MimeMessage;
@@ -31,12 +27,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.*;
+import static org.mockito.Mockito.*;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ContainerManager.class, LoggerFactory.class, MessageParser.class})
-@PowerMockIgnore("javax.security.auth.Subject")
+@RunWith(MockitoJUnitRunner.class)
 public class MessageParserTest
 {
     /**
@@ -53,8 +46,6 @@ public class MessageParserTest
     @Mock User user;
     @Mock ConfluenceUser confluenceUser;
 
-    private MessageParser messageParser;
-
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         // Read in example mail from disk.
@@ -68,14 +59,6 @@ public class MessageParserTest
         // Mock global max attachment size.
         when(settingsManager.getGlobalSettings()).thenReturn(globalSettings);
         when(globalSettings.getAttachmentMaxSize()).thenReturn((long)(1024 * 1024 * 100)); // 100 MB
-
-        // Mock ContainerManager.
-        // So that ContainerManager.autowire(this) doesn't fail in constructor of MessageParser.
-        mockStatic(ContainerManager.class);
-
-        // Mock attachment creation.
-        mock(Attachment.class);
-        whenNew(Attachment.class).withAnyArguments().thenReturn(mock(Attachment.class));
     }
 
     /**
@@ -86,9 +69,7 @@ public class MessageParserTest
     {
         MailConfiguration mailConfiguration = MailConfiguration.builder().build();
 
-        MessageParser messageParser = new MessageParser(exampleMessage, new MailConfigurationWrapper(mailConfiguration));
-        messageParser.setSettingsManager(settingsManager);
-        messageParser.setUserAccessor(userAccessor);
+        MessageParser messageParser = spy(new MessageParser(exampleMessage, new MailConfigurationWrapper(mailConfiguration)));
 
         Charset utf8 = messageParser.getCharsetFromHeader("text/plain; charset=\"utf-8\"");
         Charset iso88591 = messageParser.getCharsetFromHeader("text/html; charset=\"ISO-8859-1\"");
@@ -112,9 +93,9 @@ public class MessageParserTest
     {
         MailConfiguration mailConfiguration = MailConfiguration.builder().build();
 
-        MessageParser messageParser = new MessageParser(exampleMessage, new MailConfigurationWrapper(mailConfiguration));
-        messageParser.setSettingsManager(settingsManager);
-        messageParser.setUserAccessor(userAccessor);
+        MessageParser messageParser = spy(new MessageParser(exampleMessage, new MailConfigurationWrapper(mailConfiguration)));
+        doReturn(mock(Attachment.class)).when(messageParser).newAttachment();
+        doReturn(settingsManager).when(messageParser).getSettingsManager();
 
         // Extract data from message.
         List<MailPartData> content = messageParser.getContent();
@@ -145,9 +126,9 @@ public class MessageParserTest
         .preferredContentTypes(new String[] {"text/plain", "text/html"})
         .build();
 
-        MessageParser messageParser = new MessageParser(exampleMessage, new MailConfigurationWrapper(mailConfiguration));
-        messageParser.setSettingsManager(settingsManager);
-        messageParser.setUserAccessor(userAccessor);
+        MessageParser messageParser = spy(new MessageParser(exampleMessage, new MailConfigurationWrapper(mailConfiguration)));
+        doReturn(mock(Attachment.class)).when(messageParser).newAttachment();
+        doReturn(settingsManager).when(messageParser).getSettingsManager();
 
         // Extract data from message.
         List<MailPartData> content = messageParser.getContent();
@@ -171,9 +152,7 @@ public class MessageParserTest
         .allowedFileTypes("jpg image/jpg")
         .build();
 
-        MessageParser messageParser = new MessageParser(exampleMessage, new MailConfigurationWrapper(mailConfiguration));
-        messageParser.setSettingsManager(settingsManager);
-        messageParser.setUserAccessor(userAccessor);
+        MessageParser messageParser = spy(new MessageParser(exampleMessage, new MailConfigurationWrapper(mailConfiguration)));
 
         // Extract data from message.
         List<MailPartData> content = messageParser.getContent();
@@ -194,9 +173,7 @@ public class MessageParserTest
         .maxAllowedNumberOfAttachments(0)
         .build();
 
-        MessageParser messageParser = new MessageParser(exampleMessage, new MailConfigurationWrapper(mailConfiguration));
-        messageParser.setSettingsManager(settingsManager);
-        messageParser.setUserAccessor(userAccessor);
+        MessageParser messageParser = spy(new MessageParser(exampleMessage, new MailConfigurationWrapper(mailConfiguration)));
 
         // Extract data from message.
         List<MailPartData> content = messageParser.getContent();
@@ -217,9 +194,8 @@ public class MessageParserTest
         .maxAllowedAttachmentSize(0)
         .build();
 
-        MessageParser messageParser = new MessageParser(exampleMessage, new MailConfigurationWrapper(mailConfiguration));
-        messageParser.setSettingsManager(settingsManager);
-        messageParser.setUserAccessor(userAccessor);
+        MessageParser messageParser = spy(new MessageParser(exampleMessage, new MailConfigurationWrapper(mailConfiguration)));
+        doReturn(settingsManager).when(messageParser).getSettingsManager();
 
         // Extract data from message.
         List<MailPartData> content = messageParser.getContent();
@@ -248,9 +224,8 @@ public class MessageParserTest
         .maxAllowedAttachmentSize(0)
         .build();
 
-        MessageParser messageParser = new MessageParser(exampleMessage, new MailConfigurationWrapper(mailConfiguration));
-        messageParser.setSettingsManager(settingsManager);
-        messageParser.setUserAccessor(userAccessor);
+        MessageParser messageParser = spy(new MessageParser(exampleMessage, new MailConfigurationWrapper(mailConfiguration)));
+        doReturn(userAccessor).when(messageParser).getUserAccessor();
 
         assertEquals("Failed to get user", confluenceUser, messageParser.getSender());
     }
@@ -277,9 +252,8 @@ public class MessageParserTest
         .maxAllowedAttachmentSize(0)
         .build();
 
-        MessageParser messageParser = new MessageParser(exampleMessage, new MailConfigurationWrapper(mailConfiguration));
-        messageParser.setSettingsManager(settingsManager);
-        messageParser.setUserAccessor(userAccessor);
+        MessageParser messageParser = spy(new MessageParser(exampleMessage, new MailConfigurationWrapper(mailConfiguration)));
+        doReturn(userAccessor).when(messageParser).getUserAccessor();
 
         assertEquals("Failed to get user", confluenceUser, messageParser.getSender());
     }
@@ -302,9 +276,8 @@ public class MessageParserTest
         .maxAllowedAttachmentSize(0)
         .build();
 
-        MessageParser messageParser = new MessageParser(exampleMessage, new MailConfigurationWrapper(mailConfiguration));
-        messageParser.setSettingsManager(settingsManager);
-        messageParser.setUserAccessor(userAccessor);
+        MessageParser messageParser = spy(new MessageParser(exampleMessage, new MailConfigurationWrapper(mailConfiguration)));
+        doReturn(userAccessor).when(messageParser).getUserAccessor();
 
         assertNull("User returned instead of null", messageParser.getSender());
     }

@@ -11,11 +11,10 @@ After successfully compiling the plugin, it will be available in `target/` as `m
 ## Integration tests
 
 The source code comes with one integration test, that tests the whole process of converting mails to blog posts.
-You can run the test with the command `atlas-integration` that will set up a confluence instance in the background
-and will run the test in that instance. The whole test takes several minutes to finish. During development
-it makes sense to run the test in a development environment, that you can start with `atlas-debug`, then you can start
-the integration test via a REST call to:
-`http://localhost:1990/confluence/rest/atlassiantestrunner/1.0/runtest/IntegrationTest`.
+The official atlassian way to run integration tests just proved to be too buggy, so instead a simple rest call can
+be used to run an integration test on a test instance. After launching a test instance with `atlas-debug` you
+can access the integration test by url:
+[/confluence/plugins/servlet/restbrowser#/resource/mail2blog-tests-1-0-runtest-testprocess](http://localhost:1990/confluence/plugins/servlet/restbrowser#/resource/mail2blog-tests-1-0-runtest-testprocess).
 
 ## The Main Process
 
@@ -26,8 +25,6 @@ after successfully handling the message, in case of an error the message is move
 When using POP3 the message gets deleted, because POP3 doesn't support folders.
 
 ![Process](workflow_confluence_to_mail.jpg)
-
-![Class Diagram](classdiagram.jpg)
 
 ## The Configuration Process
 

@@ -1,32 +1,34 @@
 package de.dm.mail2blog;
 
-import com.atlassian.confluence.user.ConfluenceUser;
-import lombok.*;
-import lombok.extern.slf4j.Slf4j;
-import static org.apache.commons.lang.StringEscapeUtils.escapeHtml;
+import com.atlassian.confluence.pages.Attachment;
 import com.atlassian.confluence.setup.settings.SettingsManager;
-import com.atlassian.confluence.pages.*;
+import com.atlassian.confluence.user.ConfluenceUser;
 import com.atlassian.confluence.user.UserAccessor;
-import com.atlassian.spring.container.ContainerManager;
-import com.atlassian.user.*;
+import com.atlassian.user.User;
 import com.atlassian.user.search.SearchResult;
 import com.atlassian.user.search.page.Pager;
+import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
+
 import javax.mail.*;
-import javax.mail.internet.*;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static org.apache.commons.lang.StringEscapeUtils.escapeHtml;
 
 
 @Slf4j
 public class MessageParser {
-    // Autowired components.
-    @Setter private UserAccessor userAccessor;
-    @Setter private SettingsManager settingsManager;
-
     // Config to use.
     private MailConfigurationWrapper mailConfigurationWrapper;
 
@@ -39,9 +41,6 @@ public class MessageParser {
     public MessageParser(@NonNull Message message, @NonNull MailConfigurationWrapper mailConfigurationWrapper) {
         this.mailConfigurationWrapper = mailConfigurationWrapper;
         this.message = message;
-
-        // Autowire this object.
-        ContainerManager.autowireComponent(this);
     }
 
     /**
@@ -80,7 +79,7 @@ public class MessageParser {
 
 
         // Get user for mail.
-        SearchResult result = userAccessor.getUsersByEmail(mail);
+        SearchResult result = getUserAccessor().getUsersByEmail(mail);
         Pager pager = result.pager();
         List page = pager.getCurrentPage();
 
@@ -100,7 +99,7 @@ public class MessageParser {
             return (ConfluenceUser)page.get(0);
         } else {
             String username = ((User)page.get(0)).getName();
-            return userAccessor.getUserByName(username);
+            return getUserAccessor().getUserByName(username);
         }
     }
 
@@ -231,7 +230,9 @@ public class MessageParser {
         int index = mimeType.indexOf(';');
         if (index >= 0) { mimeType = mimeType.substring(0, index); }
 
-        if (mimeType.toLowerCase().equals("text/html") || mimeType.toLowerCase().equals("text/plain")) {
+
+        String m = mimeType.toLowerCase();
+        if (m.equals("application/xhtml+xml") || m.equals("text/html") || m.equals("text/plain")) {
             return extractContent(part, mimeType);
         } else {
             return extractAttachment(part, mimeType);
@@ -304,7 +305,7 @@ public class MessageParser {
             // and the one configured in the plugin.
             long maxsize = Math.min(
                 1024 * 1024 * mailConfigurationWrapper.getMailConfiguration().getMaxAllowedAttachmentSize(),
-                settingsManager.getGlobalSettings().getAttachmentMaxSize()
+                getSettingsManager().getGlobalSettings().getAttachmentMaxSize()
             );
 
             do {
@@ -325,7 +326,7 @@ public class MessageParser {
         }
 
         // Create new attachment.
-        Attachment attachment = new Attachment();
+        Attachment attachment = newAttachment();
         attachment.setFileName(filename);
         attachment.setMediaType(mimeType);
         attachment.setFileSize(filesize);
@@ -345,5 +346,17 @@ public class MessageParser {
         attachmentCounter++;
 
         return result;
+    }
+
+    public Attachment newAttachment() {
+        return new Attachment();
+    }
+
+    public SettingsManager getSettingsManager() {
+        return StaticAccessor.getSettingsManager();
+    }
+
+    public UserAccessor getUserAccessor() {
+        return StaticAccessor.getUserAccessor();
     }
 }

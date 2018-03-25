@@ -17,7 +17,17 @@ deploy:
     repo: dm-drogeriemarkt/Mail2Blog
     tags: true
 
-script: "mvn cobertura:cobertura"
+install:
+  # installing atlassian sdk
+  - wget https://marketplace.atlassian.com/download/plugins/atlassian-plugin-sdk-tgz
+  - tar zxvf atlassian-plugin-sdk-tgz
+  - mv atlassian-plugin-sdk-*/ atlassian-plugin-sdk
+  - export PATH="${PATH}:${PWD}/atlassian-plugin-sdk/bin"
+  - atlas-version
+
+script:
+  - atlas-package # Build package
+  - atlas-mvn cobertura:cobertura # Test coverage
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)

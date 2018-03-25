@@ -1,14 +1,18 @@
 package de.dm.mail2blog;
 
-import lombok.*;
+import com.atlassian.plugin.spring.scanner.annotation.export.ExportAsService;
+import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Autowired bean that stores the plugin wide state.
  */
-public class GlobalState implements IGlobalState {
+@Component
+@ExportAsService
+public class GlobalState {
 
-    // Auto wired components.
-    @Setter private MailConfigurationManager mailConfigurationManager;
+    @Setter @Autowired private MailConfigurationManager mailConfigurationManager;
 
     /**
      * The currently used configuration

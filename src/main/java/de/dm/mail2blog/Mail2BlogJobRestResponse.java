@@ -1,13 +1,16 @@
 package de.dm.mail2blog;
 
-import com.atlassian.scheduler.JobRunnerResponse;
-import lombok.*;
+import lombok.Data;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import java.io.Serializable;
+
 @XmlRootElement(name = "result")
 @XmlAccessorType(XmlAccessType.FIELD)
 @Data
-public class Mail2BlogJobRestResponse {
+public class Mail2BlogJobRestResponse implements Serializable {
     String status = "";
     String message = "";
 }

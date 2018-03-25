@@ -2,19 +2,15 @@ package ut.de.dm.mail2blog;
 
 import com.atlassian.confluence.spaces.Space;
 import com.atlassian.confluence.spaces.SpaceManager;
+import com.atlassian.json.jsonorg.JSONObject;
 import com.atlassian.user.Group;
 import com.atlassian.user.GroupManager;
 import com.atlassian.user.search.page.Pager;
-import de.dm.mail2blog.GlobalState;
-import de.dm.mail2blog.MailConfiguration;
-import de.dm.mail2blog.MailConfigurationWrapper;
-import de.dm.mail2blog.actions.CheckboxTracker;
-import de.dm.mail2blog.actions.ConfigurationAction;
-import de.dm.mail2blog.actions.ConfigurationActionState;
+import de.dm.mail2blog.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.beans.BeanInfo;
 import java.beans.Introspector;
@@ -23,10 +19,10 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 import static org.junit.Assert.*;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-@RunWith(PowerMockRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class ConfigurationActionTest
 {
     private static final String SPACE1_KEY = "de";
@@ -95,7 +91,6 @@ public class ConfigurationActionTest
         groups.add(groupB);
 
         Pager<Group> pager = mock(Pager.class);
-        when(pager.isEmpty()).thenReturn(groups.isEmpty());
         when(pager.iterator()).thenReturn(groups.iterator());
 
         when(groupManager.getGroups()).thenReturn(pager);
@@ -161,20 +156,20 @@ public class ConfigurationActionTest
         configurationAction.setPreferred("text");
         assertEquals("text", configurationAction.getPreferred());
         assertArrayEquals(
-            new String[]{"text/plain", "text/html"},
+            new String[]{"text/plain", "text/html", "application/xhtml+xml"},
             configurationAction.getMailConfiguration().getPreferredContentTypes()
         );
 
         configurationAction.setPreferred("html");
         assertEquals("html", configurationAction.getPreferred());
         assertArrayEquals(
-            new String[]{"text/html", "text/plain"},
+            new String[]{"text/html", "application/xhtml+xml", "text/plain"},
             configurationAction.getMailConfiguration().getPreferredContentTypes()
         );
     }
 
     /**
-     * Test the validation process with true and false values.
+     * Test the validation process.
      */
     @Test
     public void testValidate() throws Exception {
@@ -212,6 +207,28 @@ public class ConfigurationActionTest
         assertValidate("mailConfiguration.securityGroup", "bogus", false);
     }
 
+    /**
+     * Test the validation process for space rules.
+     */
+    @Test
+    public void testValidateSpaceRules() throws Exception {
+        assertSpaceRule("from", "is", "alpha", "copy", SPACE1_KEY, true);
+        assertSpaceRule("to", "contains", "bravo", "move", SPACE1_KEY, true);
+        assertSpaceRule("cc", "start", "charlie", "copy", SPACE2_KEY, true);
+        assertSpaceRule("subject", "end", "delta", "copy", SPACE2_KEY, true);
+
+        assertSpaceRule("from", "regexp", "^echo", "copy", SPACE1_KEY, true);
+        assertSpaceRule("from", "regexp", "echo$", "copy", SpaceRuleSpaces.CapturingGroup0, true);
+        assertSpaceRule("from", "regexp", "echo ([0-9]*)", "copy", SpaceRuleSpaces.CapturingGroup1, true);
+
+        assertSpaceRule("bogus", "is", "alpha", "copy", SPACE1_KEY, false); // Invalid field
+        assertSpaceRule("from", "nonsense", "alpha", "copy", SPACE1_KEY, false); // Invalid operator
+        assertSpaceRule("from", "is", "alpha", "notworking", SPACE1_KEY, false); // Invalid action
+        assertSpaceRule("from", "is", "alpha", "copy", "nirvana", false); // Invalid space
+        assertSpaceRule("from", "is", "alpha", "copy", SpaceRuleSpaces.CapturingGroup0, false); // Capturing group not on regexp
+        assertSpaceRule("cc", "start", "charlie", "move", SpaceRuleSpaces.CapturingGroup1, false); // Capturing group not on regexp
+        assertSpaceRule("from", "regexp", "^(unclosed group", "copy", SPACE1_KEY, false); // Invalid regexp
+    }
 
     /**
      * Set a value on a html field. Call the validation routine. Check the result.
@@ -243,6 +260,56 @@ public class ConfigurationActionTest
                 validationResult
             );
         }
+    }
+
+    /**
+     * Check that space rules are validated properly.
+     */
+    private void assertSpaceRule(String field, String operator, String value, String action, String space, boolean expectedResult) throws Exception {
+        configurationAction.setSpaceRuleFields(new String[]{field});
+        configurationAction.setSpaceRuleOperators(new String[]{operator});
+        configurationAction.setSpaceRuleValues(new String[]{value});
+        configurationAction.setSpaceRuleActions(new String[]{action});
+        configurationAction.setSpaceRuleSpaces(new String[]{space});
+
+        // Reset errors and validate.
+        configurationAction.setFieldErrors(new HashMap<String, String>());
+        configurationAction.validate();
+
+        // Look for an error message.
+        boolean validationResult = false;
+        if (configurationAction.getFieldErrors().get("mailConfiguration.spaceRules") == null) {
+            validationResult = true;
+        };
+
+        // Json representation of spaceRule for pretty printing.
+        JSONObject jsonSpaceRule = new JSONObject();
+        jsonSpaceRule.put("field", field);
+        jsonSpaceRule.put("operator", operator);
+        jsonSpaceRule.put("value", value);
+        jsonSpaceRule.put("action", action);
+        jsonSpaceRule.put("space", space);
+
+        if (expectedResult) {
+            assertTrue(
+                "Unexpected error msg for SpaceRule" + jsonSpaceRule.toString(),
+                validationResult
+            );
+        } else {
+            assertFalse(
+                "Expected an error msg for SpaceRule" + jsonSpaceRule.toString(),
+                validationResult
+            );
+        }
+
+        SpaceRule[] rules = configurationAction.getMailConfiguration().getSpaceRules();
+        assertEquals("expected 1 space rule after validation", 1, rules.length);
+
+        assertEquals(field, rules[0].getField());
+        assertEquals(operator, rules[0].getOperator());
+        assertEquals(value, rules[0].getValue());
+        assertEquals(action, rules[0].getAction());
+        assertEquals(space, rules[0].getSpace());
     }
 
     /**

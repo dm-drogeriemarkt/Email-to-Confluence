@@ -1,6 +1,5 @@
 package ut.de.dm.mail2blog;
 
-import com.atlassian.spring.container.ContainerManager;
 import de.dm.mail2blog.MailConfiguration;
 import de.dm.mail2blog.MailConfigurationWrapper;
 import de.dm.mail2blog.Mailbox;
@@ -9,8 +8,7 @@ import de.saly.javamail.mock2.MockMailbox;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.mail.Folder;
 import javax.mail.Message;
@@ -21,8 +19,7 @@ import javax.mail.internet.MimeMessage;
 import static junit.framework.TestCase.assertNotNull;
 import static org.junit.Assert.assertEquals;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ContainerManager.class})
+@RunWith(MockitoJUnitRunner.class)
 public class MailboxTest {
 
     MimeMessage exampleMail1;

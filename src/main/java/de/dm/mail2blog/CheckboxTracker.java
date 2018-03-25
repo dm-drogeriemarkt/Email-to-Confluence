@@ -1,8 +1,8 @@
-package de.dm.mail2blog.actions;
+package de.dm.mail2blog;
 
 import com.atlassian.xwork.ParameterSafe;
-import de.dm.mail2blog.MailConfiguration;
 import lombok.Setter;
+import org.springframework.stereotype.Component;
 
 /**
  * This class is a workaround for the issue that checkboxes only transmit
@@ -10,6 +10,7 @@ import lombok.Setter;
  * When calling commit all checkboxes that have been set will be set to true all others to false.
  */
 @ParameterSafe // https://developer.atlassian.com/confdev/confluence-plugin-guide/confluence-plugin-module-types/xwork-webwork-module/xwork-plugin-complex-parameters-and-security
+@Component
 public class CheckboxTracker {
     @Setter boolean secure = false;
     @Setter boolean checkCertificates = false;
@@ -23,6 +24,7 @@ public class CheckboxTracker {
     @Setter boolean htmlmacro = false;
     @Setter boolean spaceKeyInAddress = false;
     @Setter boolean spaceKeyInSubject = false;
+    @Setter boolean doNotShowPop3Confirmation = false;
 
     /**
      * Reset all checkbox values to false.
@@ -58,5 +60,6 @@ public class CheckboxTracker {
         mailConfiguration.setHtmlmacro(htmlmacro);
         mailConfiguration.setSpaceKeyInAddress(spaceKeyInAddress);
         mailConfiguration.setSpaceKeyInSubject(spaceKeyInSubject);
+        mailConfiguration.setDoNotShowPop3Confirmation(doNotShowPop3Confirmation);
     }
 }

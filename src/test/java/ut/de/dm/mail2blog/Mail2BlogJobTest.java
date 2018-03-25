@@ -9,9 +9,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.mail.Message;
 import javax.mail.internet.MimeMessage;
@@ -19,12 +17,9 @@ import java.io.InputStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
-import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.*;
+import static org.mockito.Mockito.*;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(Mail2BlogJob.class)
-@PowerMockIgnore("javax.security.auth.Subject")
+@RunWith(MockitoJUnitRunner.class)
 public class Mail2BlogJobTest
 {
     /**
@@ -48,10 +43,11 @@ public class Mail2BlogJobTest
     @Before
     public void setUp() throws Exception {
         // Create mail2Blog with mocked dependency injections.
-        mail2BlogJob = new Mail2BlogJob();
+        mail2BlogJob = spy(new Mail2BlogJob());
 
         transactionTemplate = mock(TransactionTemplate.class);
-        mail2BlogJob.setTransactionTemplate(transactionTemplate);
+        doReturn(transactionTemplate).when(mail2BlogJob).getTransactionTemplate();
+        mail2BlogJob.setSpaceKeyExtractor(new SpaceKeyExtractor());
 
         globalState = mock(GlobalState.class);
         mail2BlogJob.setGlobalState(globalState);
@@ -62,9 +58,9 @@ public class Mail2BlogJobTest
         // Mock mailbox.
         mailbox = mock(Mailbox.class);
         when(mailbox.getMessages()).thenReturn(new Message[]{exampleMessage});
-
         mock(Mailbox.class);
-        whenNew(Mailbox.class).withAnyArguments().thenReturn(mailbox);
+
+        doReturn(mailbox).when(mail2BlogJob).newMailbox(any(MailConfigurationWrapper.class));
     }
 
     /**
@@ -72,8 +68,7 @@ public class Mail2BlogJobTest
      */
     @Test
     public void testFetchDisabled() throws Exception {
-        mockStatic(System.class);
-        when(System.getProperty("atlassian.mail.fetchdisabled")).thenReturn("true");
+        doReturn("true").when(mail2BlogJob).systemGetProperty("atlassian.mail.fetchdisabled");
 
         JobRunnerResponse response = mail2BlogJob.runJob(null);
 
@@ -85,8 +80,7 @@ public class Mail2BlogJobTest
      */
     @Test
     public void testPopDisabled() throws Exception {
-        mockStatic(System.class);
-        when(System.getProperty("atlassian.mail.popdisabled")).thenReturn("true");
+        doReturn("true").when(mail2BlogJob).systemGetProperty("atlassian.mail.popdisabled");
 
         JobRunnerResponse response = mail2BlogJob.runJob(null);
 
@@ -98,9 +92,8 @@ public class Mail2BlogJobTest
      */
     @Test
     public void testRunJob() throws Exception {
-        mockStatic(System.class);
-        when(System.getProperty("atlassian.mail.popdisabled")).thenReturn("false");
-        when(System.getProperty("atlassian.mail.fetchdisabled")).thenReturn("false");
+        doReturn("false").when(mail2BlogJob).systemGetProperty("atlassian.mail.fetchdisabled");
+        doReturn("false").when(mail2BlogJob).systemGetProperty("atlassian.mail.popdisabled");
 
         JobRunnerResponse response = mail2BlogJob.runJob(null);
 
@@ -120,9 +113,8 @@ public class Mail2BlogJobTest
      */
     @Test
     public void testException() throws Exception {
-        mockStatic(System.class);
-        when(System.getProperty("atlassian.mail.popdisabled")).thenReturn("false");
-        when(System.getProperty("atlassian.mail.fetchdisabled")).thenReturn("false");
+        doReturn("false").when(mail2BlogJob).systemGetProperty("atlassian.mail.fetchdisabled");
+        doReturn("false").when(mail2BlogJob).systemGetProperty("atlassian.mail.popdisabled");
 
         doThrow(new MailboxException()).when(mailbox).getMessages();
 

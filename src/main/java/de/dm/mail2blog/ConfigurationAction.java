@@ -1,15 +1,16 @@
-package de.dm.mail2blog.actions;
+package de.dm.mail2blog;
 
 import com.atlassian.confluence.core.ConfluenceActionSupport;
 import com.atlassian.confluence.spaces.Space;
 import com.atlassian.confluence.spaces.SpaceManager;
+import com.atlassian.plugin.spring.scanner.annotation.imports.ComponentImport;
 import com.atlassian.user.EntityException;
 import com.atlassian.user.Group;
 import com.atlassian.user.GroupManager;
-import de.dm.mail2blog.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -22,12 +23,20 @@ import java.util.Map;
 public class ConfigurationAction extends ConfluenceActionSupport {
 
     // Auto wired components.
-    @Setter private MailConfigurationManager mailConfigurationManager;
-    @Setter private ConfigurationActionState configurationActionState;
-    @Getter @Setter private CheckboxTracker checkboxTracker;
-    @Setter private GlobalState globalState;
-    @Setter private SpaceManager spaceManager;
-    @Setter private GroupManager groupManager;
+    @Setter @Autowired          private MailConfigurationManager mailConfigurationManager;
+    @Setter @Autowired          private ConfigurationActionState configurationActionState;
+    @Getter @Setter @Autowired  private CheckboxTracker checkboxTracker;
+    @Setter @Autowired          private GlobalState globalState;
+    @Setter @ComponentImport    private SpaceManager spaceManager;
+    @Setter @ComponentImport    private GroupManager groupManager;
+
+    // Xwork can easily deserialize to array of strings, but not to arrays of arbitrary objects.
+    // Therefore we store the properties of SpaceRule in here.
+    @Setter private String[] spaceRuleFields    = new String[]{};
+    @Setter private String[] spaceRuleOperators = new String[]{};
+    @Setter private String[] spaceRuleValues    = new String[]{};
+    @Setter private String[] spaceRuleSpaces    = new String[]{};
+    @Setter private String[] spaceRuleActions   = new String[]{};
 
     /**
      * Triggered when the user accesses the edit form for the first time.
@@ -107,6 +116,53 @@ public class ConfigurationAction extends ConfluenceActionSupport {
             addActionError("Please set the maximum number of attachments to at least -1");
         }
 
+        // Create space rules and validate them.
+        SpaceRule[] spaceRules = new SpaceRule[spaceRuleFields.length];
+
+        if (
+               (spaceRuleFields.length != spaceRuleOperators.length)
+            || (spaceRuleFields.length != spaceRuleValues.length)
+            || (spaceRuleFields.length != spaceRuleSpaces.length)
+            || (spaceRuleFields.length != spaceRuleActions.length)
+        ) {
+            addActionError("Invalid space rules");
+            addFieldError("mailConfiguration.spaceRules", "Invalid space rules");
+        } else {
+            for (int i = 0; i < spaceRuleFields.length; i++) {
+                String field = spaceRuleFields[i];
+                String operator = spaceRuleOperators[i];
+                String value = spaceRuleValues[i];
+                String space = spaceRuleSpaces[i];
+                String action = spaceRuleActions[i];
+
+                // Create space rule
+                SpaceRule spaceRule = SpaceRule.builder()
+                    .field(field)
+                    .operator(operator)
+                    .value(value)
+                    .space(space)
+                    .action(action)
+                    .build();
+
+                try {
+                    spaceRule.validate(spaceManager);
+                } catch (SpaceRuleValidationException e) {
+                    addActionError("Space rule " + (i+1) + ": " + e.getMessage());
+                    addFieldError("mailConfiguration.spaceRules", "Rule " + (i+1) + ": " + e.getMessage());
+                }
+
+                spaceRules[i] = spaceRule;
+            }
+
+            getMailConfiguration().setSpaceRules(spaceRules);
+        }
+
+        spaceRuleFields = new String[]{};
+        spaceRuleOperators = new String[]{};
+        spaceRuleValues = new String[]{};
+        spaceRuleSpaces = new String[]{};
+        spaceRuleActions = new String[]{};
+
         // Check that the syntax of the file types is valid.
         try {
             FileTypeBucket.fromString(getMailConfiguration().getAllowedFileTypes());
@@ -164,9 +220,9 @@ public class ConfigurationAction extends ConfluenceActionSupport {
 
     public void setPreferred(String contenttype) {
         if (contenttype.equals("text")) {
-            getMailConfiguration().setPreferredContentTypes(new String[]{"text/plain", "text/html"});
+            getMailConfiguration().setPreferredContentTypes(new String[]{"text/plain", "text/html", "application/xhtml+xml"});
         } else {
-            getMailConfiguration().setPreferredContentTypes(new String[]{"text/html", "text/plain"});
+            getMailConfiguration().setPreferredContentTypes(new String[]{"text/html", "application/xhtml+xml", "text/plain"});
         }
     }
 

@@ -7,7 +7,11 @@
     <a href="https://codecov.io/gh/dm-drogeriemarkt/Mail2Blog"><img src="https://img.shields.io/codecov/c/github/dm-drogeriemarkt/Mail2Blog.svg" alt="Build Status"></a>
 </p>
 
-A Confluence plugin that converts emails to confluence blog posts.
+Send email to Confluence. This add-on converts emails to Confluence blog posts. Store and reference your weekly/daily/monthly newsletters in Confluence.
+
+<p align="center">
+    <img width="33%" src="doc/example-blog-post.jpg">
+</p>
 
 #### Features
 
@@ -18,7 +22,7 @@ A Confluence plugin that converts emails to confluence blog posts.
 - Customizable HTML filters
 - Supports filtering sender addresses
 - Supports blocking attachments with dangerous extensions
-- Can post into different spaces based on the receivers address or the subject line
+- Can post into different spaces
 
 ## First Steps
 
@@ -43,8 +47,9 @@ The configuration is explained on the configuration page.
 The advanced configuration options are explained [here](doc/advanced_configuration.md).
 
 ## Further Information
-- [Advanced Configuration](doc/advanced_configuration.md)
+- [Formatting](doc/formatting.md)
 - [Technical Documentation](doc/technical_documentation.md)
+- [Security Guide](doc/security_guide.md)
 - [FAQ](doc/faq.md)
 - [Konzeption und Entwicklung des Confluence-Add-ons Mail2Blog (German)](doc/konzeption_und_entwicklung_des_confluence_add_ons_mail2blog.pdf)
 - [Code Of Conduct](CODE_OF_CONDUCT.md)

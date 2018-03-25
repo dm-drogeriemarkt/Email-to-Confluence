@@ -1,6 +1,4 @@
-# Advanced Configuration
-
-### Formatting
+# Formatting
 
 You can set the preferred content type (plain text or HTML)
 and the allowed HTML elements in the formatting section on the configuration page.
@@ -50,26 +48,3 @@ In HTML only mails all HTML will be stripped if all elements are disallowed.
 | Editor                             |
 | ---------------------------------- |
 | ![Editor](example3_editor.png) |
-  
-### Spaces
-
-Confluence stores pages and blog posts in [spaces](https://confluence.atlassian.com/doc/spaces-139459.html).
-All spaces are identified by their [space key](https://confluence.atlassian.com/doc/space-keys-829076188.html).
-By default the plugin posts all mails into the default space. You can enable additional strategies to determine
-the space into which to post.
-
-#### Address
-
-If your mail provider supports addresses in [VERP](http://www.postfix.org/VERP_README.html)-style,
-you can include the space key in the mail address.
-However only a few providers like Googlemail do support VERP, Microsoft Exchange for example does not.
-
-![Settings](space_in_address.png)
-![VERP example](verp_mail.png)
-
-#### Subject
-
-You can include the space key in the subject line.
-
-![Settings](space_in_subject.png)
-![Subject example](subject_mail.png)

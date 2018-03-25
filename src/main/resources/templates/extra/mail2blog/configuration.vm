@@ -5,6 +5,98 @@ $webResourceManager.requireResource("com.atlassian.auiplugin:aui-select2")
         <title>Mail to Blog Configuration</title>
         <meta name="decorator" content="atl.admin" />
         <script type="text/javascript">
+            function updateSpacesOptions(tr) {
+                var spaceSelect = tr.find('select.spaceRules\\.space');
+                var operatorSelect = tr.find("select.spaceRules\\.operator");
+                var matchgroupOptions = spaceSelect.find('.spaceRules\\.space\\.matchgroups');
+
+                if (operatorSelect.val() == 'regexp') {
+                    if (matchgroupOptions.length == 0) {
+                        spaceSelect.prepend('<optgroup label="Regexp" class="spaceRules.space.matchgroups"><option value="_group_0">Capturing Group 0</option><option value="_group_1">Capturing Group 1</option></optgroup>');
+                        spaceSelect.trigger('change');
+                    }
+                } else {
+                    if (matchgroupOptions.length != 0) {
+                        matchgroupOptions.remove();
+                        spaceSelect.trigger('change');
+                    }
+                }
+            }
+
+            /**
+             * Add a rule to the rules table.
+             */
+            function addRule() {
+                var tr = AJS.$("<tr>");
+
+                var buttons = AJS.$("<td>");
+
+                buttons.append(AJS.$("<button>", {
+                    class: "aui-button aui-button-subtle spaceRules.delete",
+                    html: '<span class="aui-icon aui-icon-small aui-iconfont-delete"></span>',
+                    title: "remove",
+                    type: "button",
+                    style: "float:left"
+                }));
+
+                buttons.append(AJS.$("<button>", {
+                    class: "aui-button aui-button-subtle spaceRules.moveUp",
+                    html: '<span class="aui-icon aui-icon-small aui-iconfont-arrows-up"></span>',
+                    title: "move up",
+                    type: "button",
+                    style: "float:left"
+                }))
+
+                buttons.append(AJS.$("<button>", {
+                    class: "aui-button aui-button-subtle spaceRules.moveDown",
+                    html: '<span class="aui-icon aui-icon-small aui-iconfont-arrows-down"></span>',
+                    title: "move down",
+                    type: "button",
+                    style: "float:left"
+                }))
+
+                tr.append(buttons);
+
+                tr.append(AJS.$('<td>', {width:"18%"}).html(AJS.$("<select>", {
+                    class: "spaceRules.field",
+                    name: "spaceRuleFields",
+                    html: '<option value="from">From</option><option value="to">TO</option><option value="cc">CC</option><option value="subject">Subject</option><option value="to/cc">TO or CC</option>'
+                })));
+
+                tr.append(AJS.$('<td>', {width:"18%"}).html(AJS.$("<select>", {
+                    class: "spaceRules.operator",
+                    name: "spaceRuleOperators",
+                    html: '<option value="is">is equal to</option><option value="contains">contains</option><option value="start">starts with</option><option value="end">ends with</option><option value="regexp">matches regexp</option>'
+                })));
+
+                tr.append(AJS.$('<td>', {width:"18%"}).html(AJS.$("<input>", {
+                    class: "text spaceRules.value",
+                    name: "spaceRuleValues"
+                })));
+
+                tr.append(AJS.$("<td>").html('<select class="spaceRules.action" name="spaceRuleActions"><option value="move">move to</option><option value="copy">copy to</option></select>'));
+
+                var spaceOptions = '';
+                spaceOptions += '<optgroup label="Spaces">';
+                #foreach($space in $spaces.entrySet())
+                    spaceOptions += '<option value="${space.key}">${space.value}</option>';
+                #end
+                spaceOptions += '</optgroup>';
+
+                tr.append(AJS.$("<td>").html(AJS.$("<select>", {
+                    class: "spaceRules.space",
+                    name: "spaceRuleSpaces",
+                    html: spaceOptions
+                })));
+
+                AJS.$("#spaceRules tbody").append(tr);
+
+                tr.find(".spaceRules\\.field").auiSelect2();
+                tr.find(".spaceRules\\.operator").auiSelect2();
+                tr.find(".spaceRules\\.space").auiSelect2();
+                tr.find(".spaceRules\\.action").auiSelect2();
+                updateSpacesOptions(tr);
+            }
 
             /**
              * Select port depending on prtocol (IMAP or POP3) and ssl setting.
@@ -19,7 +111,7 @@ $webResourceManager.requireResource("com.atlassian.auiplugin:aui-select2")
                 var map = {
                     true : {
                         'imap' : '993',
-                        'pop3' : '995',
+                        'pop3' : '995'
                     },
                     false : {
                         'imap' : '143',
@@ -41,12 +133,126 @@ $webResourceManager.requireResource("com.atlassian.auiplugin:aui-select2")
             }
 
             AJS.$(document).ready(function() {
+
                 AJS.$("#mailConfiguration\\.defaultSpace").auiSelect2();
                 AJS.$("#mailConfiguration\\.securityGroup").auiSelect2();
+                AJS.$(".spaceRules\\.field").auiSelect2();
+                AJS.$(".spaceRules\\.operator").auiSelect2();
+                AJS.$(".spaceRules\\.space").auiSelect2();
+                AJS.$(".spaceRules\\.action").auiSelect2();
+
+                // Init space options.
+                AJS.$("#spaceRules tr").each(function() {
+                    updateSpacesOptions(AJS.$(this));
+                })
+
+                AJS.$("#spaceRules").on('click', ".spaceRules\\.delete", function () {
+                    AJS.$(this).closest('tr').remove();
+                });
+
+                AJS.$("#spaceRules").on('click', ".spaceRules\\.moveUp", function () {
+                    var row = jQuery(this).closest('tr');
+                    row.insertBefore(row.prev());
+                });
+
+                AJS.$("#spaceRules").on('click', ".spaceRules\\.moveDown", function () {
+                    var row = jQuery(this).closest('tr');
+                    row.insertAfter(row.next());
+                });
+
+                AJS.$("#spaceRules").on('change', "select.spaceRules\\.operator", function() {
+                    var tr = AJS.$(this).closest('tr');
+                    updateSpacesOptions(tr);
+                });
+
+                AJS.$('#editmailconfiguration_form').submit(function(e) {
+                    var pop3WarningConfirmed = AJS.$('#editmailconfiguration_form').attr('data-pop3-warning-confirmed');
+                    var doNotShowPop3Confirmuation = AJS.$('#mailConfiguration\\.doNotShowPop3Confirmation').val();
+                    var protocol = AJS.$('#mailConfiguration\\.protocol').val();
+                    var email = AJS.$('#mailConfiguration\\.emailaddress').val();
+
+                    if (pop3WarningConfirmed != "true" && doNotShowPop3Confirmuation != "true" && protocol == 'pop3' && email != "") {
+                        e.preventDefault()
+
+                        // Prepare warning dialog
+                        AJS.$('#pop3_warning_dialog_confirmation_text').val("");
+                        AJS.$('#pop3_warning_dialog_confirm').disable();
+                        AJS.$('#pop3_warning_dialog_email').html("with email address <strong>" + email + "</strong>");
+
+                        // Show warning dialog
+                        AJS.dialog2("#pop3_warning_dialog").show();
+                    }
+                });
+
+                AJS.$('#pop3_warning_dialog_cancel').click(function(e) {
+                    AJS.dialog2("#pop3_warning_dialog").hide();
+                });
+
+                AJS.$('#pop3_warning_dialog_confirm').click(function(e) {
+                    var email = AJS.$('#mailConfiguration\\.emailaddress').val();
+                    if (AJS.$('#pop3_warning_dialog_confirmation_text').val() == email) {
+                        if (AJS.$('#pop3_warning_dialog_doNotShowPop3Confirmation').is(':checked')) {
+                            AJS.$('#mailConfiguration\\.doNotShowPop3Confirmation').val("true");
+                        } else {
+                            AJS.$('#mailConfiguration\\.doNotShowPop3Confirmation').val("false");
+                        }
+                        AJS.$('#editmailconfiguration_form').attr('data-pop3-warning-confirmed', "true");
+                        AJS.$('#editmailconfiguration_form').attr('data-pop3-warning-confirmed', "true");
+                        AJS.dialog2("#pop3_warning_dialog").hide();
+
+                        AJS.$('#editmailconfiguration_form').submit();
+                    }
+                });
+
+                AJS.$("#pop3_warning_dialog_confirmation_text").on("propertychange change click keyup input paste blur", function(){
+                    var email = AJS.$('#mailConfiguration\\.emailaddress').val();
+                    if (AJS.$(this).val() == email) {
+                        AJS.$('#pop3_warning_dialog_confirm').enable();
+                    } else {
+                        AJS.$('#pop3_warning_dialog_confirm').disable();
+                    }
+                })
+
+                AJS.$("#spaceRules\\.add").click(function() {
+                    addRule();
+                });
             });
         </script>
     </head>
     <body>
+        <section id="pop3_warning_dialog" class="aui-dialog2 aui-dialog2-medium aui-dialog2-warning aui-layer" role="dialog" aria-hidden="true">
+            <header class="aui-dialog2-header">
+                <h2 class="aui-dialog2-header-main">Are you ABSOLUTELY sure?</h2>
+                <a class="aui-dialog2-header-close">
+                    <span class="aui-icon aui-icon-small aui-iconfont-close-dialog">Close</span>
+                </a>
+            </header>
+            <div class="aui-dialog2-content">
+                <p>You're using POP3: <strong>ALL</strong> your email will be <strong>DELETED</strong> from your INBOX <span id="pop3_warning_dialog_email"></span> after processing.
+                You should use a dedicated mailbox for this plugin. <strong>Do not use your private or work account.</strong></p>
+                <p>Please type in the email address of your mailbox to confirm.</p>
+                <form class="aui" style="margin-top:0" onsubmit="return false;">
+                    <input type="text" class="text" id="pop3_warning_dialog_confirmation_text" style="max-width: 100%; width:100%">
+                    <div class="checkbox">
+                        <input
+                            class="checkbox"
+                            id="pop3_warning_dialog_doNotShowPop3Confirmation"
+                            type="checkbox"
+                            value="true"
+                            #if (${mailConfiguration.doNotShowPop3Confirmation}) checked="checked" #end"
+                        >
+                        <label for="pop3_warning_dialog_doNotShowPop3Confirmation">Do not show this warning again</label>
+                    </div>
+                </form>
+            </div>
+            <footer class="aui-dialog2-footer">
+                <div class="aui-dialog2-footer-actions">
+                    <button type="button" disabled="true" id="pop3_warning_dialog_confirm" class="aui-button aui-button-primary">I understand that my INBOX will be wiped clean, proceed</button>
+                    <button type="button" id="pop3_warning_dialog_cancel" class="aui-button aui-button-link">Cancel</button>
+                </div>
+            </footer>
+        </section>
+
         #if ($actionErrors)
             <div style="margin-bottom: 10px;">
                 #parse( "/template/includes/actionerrors.vm" )
@@ -72,7 +278,7 @@ $webResourceManager.requireResource("com.atlassian.auiplugin:aui-select2")
                     <ul style="margin-top:0">
                         <li><a href="https://marketplace.atlassian.com/plugins/de.dm.mail2blog.mail2blog/server/overview">Atlassian Marketplace</a></li>
                         <li><a href="https://github.com/dm-drogeriemarkt/Mail2Blog">Documentation</a></li>
-                        <li><a href="https://github.com/dm-drogeriemarkt/Mail2Blog/issues">Issue Reporting</a></li>
+                        <li><a href="https://github.com/dm-drogeriemarkt/Mail2Blog/issues">Report an Issue</a></li>
                         <li><a href="https://github.com/dm-drogeriemarkt/Mail2Blog">Source Code</a></li>
                     </ul>
                 </p>
@@ -86,14 +292,25 @@ $webResourceManager.requireResource("com.atlassian.auiplugin:aui-select2")
             </div>
         </div>
 
-        <form class="aui" name="editmailconfiguration_form" method="POST" action="doConfiguration.action">
+        <form class="aui" id="editmailconfiguration_form" data-pop3-warning-confirmed="false" name="editmailconfiguration_form" method="POST" action="doConfiguration.action">
+            <input id="mailConfiguration.doNotShowPop3Confirmation" name="checkboxTracker.doNotShowPop3Confirmation" type="hidden" value="${mailConfiguration.doNotShowPop3Confirmation}">
+
             <p><strong>
                 <span class="aui-icon aui-icon-small aui-iconfont-error confluence-information-macro-icon"></span>
-                Warning: When using POP3 processed messages get deleted, because POP3 doesn't support folders.
+                WARNING: When using POP3 all messages in your INBOX get deleted after processing, because POP3 doesn't support folders.<br>
             </strong></p>
+            <p>
+                <span class="aui-icon aui-icon-small aui-iconfont-info confluence-information-macro-icon"></span>
+                INFO: When using IMAP all messages in your INBOX will be moved to INBOX/Processed and INBOX/Invalid after processing.
+            </p>
+            <p>
+                <span class="aui-icon aui-icon-small aui-iconfont-info confluence-information-macro-icon"></span>
+                INFO: It&apos;s recommanded that you use a special dedicated mailbox for Mail2Blog
+            </p>
+
             <p><strong>
                 <span class="aui-icon aui-icon-small aui-iconfont-error confluence-information-macro-icon"></span>
-                Warning: If you disable SSL, you're username, password and messages will be readable to an attacker.
+                WARNING: If you disable SSL, you're username, password and messages will be readable to an attacker.
             </strong></p>
             <div style="margin: 10px 0 0 0;">
                 <fieldset>
@@ -221,41 +438,97 @@ $webResourceManager.requireResource("com.atlassian.auiplugin:aui-select2")
                                 Confluence stores pages and blog posts in
                                 <a href="https://confluence.atlassian.com/doc/spaces-139459.html" class="external-link" rel="nofollow">spaces</a>.
                                 All spaces are identified by their <a href="https://confluence.atlassian.com/doc/space-keys-829076188.html" class="external-link" rel="nofollow">space key</a>.
-                                By default all posts land in the default space, but you can enable other strategies for determining the space into which to post.
+                                By default all posts land in the default space (configured above). The default space works like the INBOX of your mail box.
+                                You can create custom rules, to move and copy messages to other spaces. Rules are evaluated from top to bottom.<br>
                             </p>
-                            <div style="margin: 10px 0 0 0;">
-                                <fieldset class="group">
-                                    <legend><span>Address</span></legend>
-                                    <div class="checkbox">
-                                        <input
-                                            class="checkbox"
-                                            type="checkbox"
-                                            name="checkboxTracker.spaceKeyInAddress"
-                                            id="mailConfiguration.spaceKeyInAddress"
-                                            value="true"
-                                            #if ($mailConfiguration.spaceKeyInAddress) checked="checked" #end
-                                        />
-                                        <label for="mailConfiguration.spaceKeyInAddress">Look for the space key in the mail address</label>
-                                        <div class="description">Use spacekey+recipient@example.org to set the space key</div>
-                                    </div>
-                                </fieldset>
+                            <noscript>
+                                <p>
+                                    <strong>To add, delete and rearrange rules activate JavaScript.</strong>
+                                </p>
+                            </noscript>
+                            <fieldset class="group" style="padding: 0">
+                                <table id="spaceRules" class="aui">
+                                    <thead>
+                                        <tr>
+                                            <th width="16%">&nbsp;</th>
+                                            <th width="54%" colspan="3">Condition<sup><a href="#capturing-condition">1</a></sup></th>
+                                            <th width="10%">Action</th>
+                                            <th width="20%">Space<sup><a href="#capturing-groups">2</a></sup></th>
+                                        </tr>
+                                    </thead>
 
-                                <fieldset class="group">
-                                    <legend><span>Subject</span></legend>
-                                    <div class="checkbox">
-                                        <input
-                                            class="checkbox"
-                                            type="checkbox"
-                                            name="checkboxTracker.spaceKeyInSubject"
-                                            id="mailConfiguration.spaceKeyInSubject"
-                                            value="true"
-                                            #if ($mailConfiguration.spaceKeyInSubject) checked="checked" #end
-                                        />
-                                        <label for="mailConfiguration.spaceKeyInSubject">Look for space key in the subject line</label>
-                                        <div class="description">Use "spacekey: Title" as subject to set the space key</div>
-                                    </div>
-                                </fieldset>
-                            </div>
+                                    <tbody>
+                                        #foreach($rule in $mailConfiguration.spaceRules)
+                                        <tr>
+                                            <td>
+                                                <button title="remove" style="float:left" class="aui-button aui-button-subtle spaceRules.delete" type="button">
+                                                    <span class="aui-icon aui-icon-small aui-iconfont-delete"></span>
+                                                </button>
+                                                <button title="move up" style="float:left" class="aui-button aui-button-subtle spaceRules.moveUp" type="button">
+                                                    <span class="aui-icon aui-icon-small aui-iconfont-arrows-up"></span>
+                                                </button>
+                                                <button title="move down" style="float:left" class="aui-button aui-button-subtle spaceRules.moveDown" type="button">
+                                                    <span class="aui-icon aui-icon-small aui-iconfont-arrows-down"></span>
+                                                </button>
+                                            </td>
+                                            <td width="18%"><select class="spaceRules.field" name="spaceRuleFields">
+                                                <option #if ($rule.field == "from")    selected="selected" #end value="from">From</option>
+                                                <option #if ($rule.field == "to")      selected="selected" #end value="to">TO</option>
+                                                <option #if ($rule.field == "cc")      selected="selected" #end value="cc">CC</option>
+                                                <option #if ($rule.field == "subject") selected="selected" #end value="subject">Subject</option>
+                                                <option #if ($rule.field == "to/cc")   selected="selected" #end value="to/cc">TO or CC</option>
+                                            </select></td>
+                                            <td width="18%"><select class="spaceRules.operator" name="spaceRuleOperators">
+                                                <option #if ($rule.operator == "is")       selected="selected" #end value="is">is equal to</option>
+                                                <option #if ($rule.operator == "contains") selected="selected" #end value="contains">contains</option>
+                                                <option #if ($rule.operator == "start")    selected="selected" #end value="start">starts with</option>
+                                                <option #if ($rule.operator == "end")      selected="selected" #end value="end">ends with</option>
+                                                <option #if ($rule.operator == "regexp")   selected="selected" #end value="regexp">matches regexp</option>
+                                            </select></td>
+                                            <td width="18%"><input class="text spaceRules.value" name="spaceRuleValues" value="${rule.value}"></td>
+                                            <td><select class="spaceRules.action" name="spaceRuleActions">
+                                                <option #if ($rule.action == "move") selected="selected" #end value="move">move to</option>
+                                                <option #if ($rule.action == "copy") selected="selected" #end value="copy">copy to</option>
+                                            </select></td>
+                                            <td><select class="spaceRules.space" name="spaceRuleSpaces" value="${rule.space}">
+                                                #if ($rule.operator == "regexp")
+                                                <optgroup label="Regexp" class="spaceRules.space.matchgroups">
+                                                    <option #if($rule.space == "_group_0") selected="selected" #end value="_group_0">Capturing Group 0</option>
+                                                    <option #if($rule.space == "_group_1") selected="selected" #end value="_group_1">Capturing Group 1</option>
+                                                </optgroup>
+                                                #end
+                                                <optgroup label="Spaces">
+                                                    #foreach($space in $spaces.entrySet())
+                                                        <option
+                                                            value="${space.key}"
+                                                            #if($space.key == $rule.space)
+                                                                selected="selected"
+                                                            #end
+                                                        >
+                                                            ${space.value}
+                                                        </option>
+                                                    #end
+                                                </optgroup>
+                                            </select></td>
+                                        </tr>
+                                        #end
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="6">
+                                                <button type="button" class="aui-button" id="spaceRules.add">
+                                                    <span class="aui-icon aui-icon-small aui-iconfont-add"></span>&nbsp;Add&nbsp;Rule
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                                <div class="description">
+                                    <sup id="capturing-condition">1</sup>&nbsp;All comparisions are performed <a  href="https://en.wikipedia.org/wiki/Case_sensitivity">case insensitive</a>, leading and ending whitespace is ignored. From, To, CC refer to email addresses without display names.<br>
+                                    <sup id="capturing-groups">2</sup>&nbsp;You can use <a target="_blank" href="https://docs.oracle.com/javase/tutorial/essential/regex/groups.html">capturing groups</a> in regular expressions to extract the space key from a field.
+                                </div>
+                                #foreach ($error in $fieldErrors.get("mailConfiguration.spaceRules")) <div class="error">$error</div> #end
+                            </fieldset>
                         </div>
                     </div>
 
@@ -486,17 +759,17 @@ $webResourceManager.requireResource("com.atlassian.auiplugin:aui-select2")
 
                             <h4>File Types</h4>
                             <p>
-                                Some attachments in emails may contain malious code. To prevent malware from being spread through Confluence
+                                Some attachments in emails may contain malicious code. To prevent malware from being spread through Confluence
                                 only relativly safe file types are allowed by default. Windows uses file extensions to categorize files,
                                 the web uses <a href="https://www.iana.org/assignments/media-types/media-types.xhtml">mime types</a>.
-                                To prevent bypassing of filters it is important that file extensions and mime types match.
+                                To prevent bypassing of filters it is important that file extensions and mime types are checked and match.
                                 You can edit the list of allowed file&nbsp;extensions/mime&nbsp;types to allow additional file types or to enforce more restrictions.
                             </p>
 
                             <div class="aui-message aui-message-error">
-                                <p class="title">Allowing the following file types poses a large security risk:</p>
+                                <p class="title">Allowing the following file types poses a high security risk:</p>
                                 <ul class="alternate">
-                                    <li>Executable files like .exe, .bat, .sh, .jar, ...</li>
+                                    <li>Executable files like .exe, .bat, .sh, .jar, .js, ...</li>
                                     <li>Documents that can contain macros like .doc, .xls, ppt, ...</li>
                                     <li>Archives, because they can carry dangerous files, like .zip, .tar, .7z, ...</li>
                                 </ul>
@@ -522,7 +795,7 @@ $webResourceManager.requireResource("com.atlassian.auiplugin:aui-select2")
                             <h3>Miscellaneous</h3>
                             <p>
                                 The <a href="https://confluence.atlassian.com/doc/gallery-macro-139434.html">gallery macro</a> can
-                                be used to display images in a gallery. If you enable this option, all attached images are shown in a gallery.
+                                be used to display attached images in a gallery. If you enable this option, the macro is added to all posts.
                             </p>
                             <div style="margin: 10px 0 0 0;">
                                 <fieldset class="group">
@@ -571,7 +844,7 @@ $webResourceManager.requireResource("com.atlassian.auiplugin:aui-select2")
                     <div class="tabs-pane" id="tabs-senders">
                         <div style="margin-top: 10px;">
                             <h3>Senders</h3>
-                            <p>The plugin tries to use the senders mail address to identify a confluence user.
+                            <p>Mail2Blog tries to use the senders mail address to identify a confluence user.
                             To fight spamming you may choose a confluence group to restrict the acceppted senders addresses.</p>
                             <p><strong>
                                 <span class="aui-icon aui-icon-small aui-iconfont-error confluence-information-macro-icon"></span>

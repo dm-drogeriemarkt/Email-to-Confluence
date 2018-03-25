@@ -6,9 +6,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.mail.Message;
 import javax.mail.internet.MimeMessage;
@@ -16,13 +15,9 @@ import java.io.InputStream;
 import java.util.ArrayList;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.*;
+import static org.mockito.Mockito.*;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({MessageTransaction.class, SpaceFactory.class})
-@PowerMockIgnore("javax.security.auth.Subject")
+@RunWith(MockitoJUnitRunner.class)
 public class MessageTransactionTest
 {
     /**
@@ -33,7 +28,8 @@ public class MessageTransactionTest
     private MailConfigurationWrapper mailConfiguration;
     private Mailbox mailbox;
     private Space space;
-    private MessageToBlogPostProcessor processor;
+    @Mock private MessageToBlogPostProcessor processor;
+    @Mock private SpaceKeyExtractor spaceKeyExtractor;
     private MessageTransaction messageTransaction;
 
     @BeforeClass
@@ -55,19 +51,16 @@ public class MessageTransactionTest
         ArrayList<Space> spaces = new ArrayList<Space>();
         spaces.add(space);
 
-        mockStatic(SpaceFactory.class);
-        when(SpaceFactory.getSpace(mailConfiguration, exampleMessage)).thenReturn(spaces);
+        when(spaceKeyExtractor.getSpaces(mailConfiguration, exampleMessage)).thenReturn(spaces);
 
-        processor = mock(MessageToBlogPostProcessor.class);
-
-        mock(MessageToBlogPostProcessor.class);
-        whenNew(MessageToBlogPostProcessor.class).withAnyArguments().thenReturn(processor);
-
-        messageTransaction = MessageTransaction.builder()
+        messageTransaction = spy(MessageTransaction.builder()
+            .spaceKeyExtractor(spaceKeyExtractor)
             .message(exampleMessage)
             .mailbox(mailbox)
             .mailConfigurationWrapper(mailConfiguration)
-            .build();
+            .build());
+
+        doReturn(processor).when(messageTransaction).newMessageToBlogProcessor(mailConfiguration);
     }
 
     /**
@@ -89,7 +82,7 @@ public class MessageTransactionTest
      */
     @Test
     public void testNoSpace() throws Exception {
-        when(SpaceFactory.getSpace(mailConfiguration, exampleMessage)).thenReturn(new ArrayList<Space>());
+        when(spaceKeyExtractor.getSpaces(mailConfiguration, exampleMessage)).thenReturn(new ArrayList<Space>());
         messageTransaction.doInTransaction();
 
         verify(processor, never()).process(any(Space.class), any(Message.class));

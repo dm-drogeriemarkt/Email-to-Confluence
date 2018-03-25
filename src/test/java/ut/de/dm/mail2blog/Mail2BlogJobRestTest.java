@@ -2,24 +2,22 @@ package ut.de.dm.mail2blog;
 
 import com.atlassian.scheduler.JobRunnerResponse;
 import com.atlassian.scheduler.status.RunOutcome;
-import de.dm.mail2blog.*;
+import de.dm.mail2blog.Mail2BlogJob;
+import de.dm.mail2blog.Mail2BlogJobRest;
+import de.dm.mail2blog.Mail2BlogJobRestResponse;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.ws.rs.core.Response;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.verify;
-import static org.mockito.internal.verification.VerificationModeFactory.times;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({Mail2BlogJobRest.class, JobRunnerResponse.class, RunOutcome.class})
+@RunWith(MockitoJUnitRunner.class)
 public class Mail2BlogJobRestTest
 {
     private Mail2BlogJob mail2BlogJob;

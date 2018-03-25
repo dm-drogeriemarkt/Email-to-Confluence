@@ -5,18 +5,7 @@
         <vendor name="${project.organization.name}" url="${project.organization.url}" />
     </plugin-info>
 
-    <!-- from the product container -->
-    <component-import key="applicationProperties" interface="com.atlassian.sal.api.ApplicationProperties" />
-
-    <!-- from the mail2blog plugin -->
-    <component-import key="MailConfigurationManager" interface="de.dm.mail2blog.IMailConfigurationManager" />
-    <component-import key="GlobalState" interface="de.dm.mail2blog.IGlobalState" />
-    <component-import key="Mail2BlogJob" interface="de.dm.mail2blog.IMail2BlogJob" />
-
-    <!-- Request factory -->
-    <component-import key="requestFactory" interface="com.atlassian.sal.api.net.RequestFactory" />
-
-    <component-import name="SAL Transaction Template" key="transactionTemplate">
-        <interface>com.atlassian.sal.api.transaction.TransactionTemplate</interface>
-    </component-import>
+    <rest key="IntegrationTestRunner" path="/mail2blog-tests" version="1.0">
+        <description>Run mail2blog integration test</description>
+    </rest>
 </atlassian-plugin>

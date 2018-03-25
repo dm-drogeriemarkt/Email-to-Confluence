@@ -1,8 +1,9 @@
 package de.dm.mail2blog;
 
 import org.apache.commons.lang3.StringUtils;
-import java.util.Properties;
+
 import javax.mail.*;
+import java.util.Properties;
 
 /**
  * Read messages from mailbox and move messages around in folders.

@@ -1,21 +1,30 @@
 package de.dm.mail2blog;
 
-import lombok.*;
-import lombok.extern.slf4j.Slf4j;
-import static org.apache.commons.lang.StringEscapeUtils.escapeHtml;
 import com.atlassian.confluence.core.DefaultSaveContext;
+import com.atlassian.confluence.pages.AttachmentManager;
+import com.atlassian.confluence.pages.BlogPost;
+import com.atlassian.confluence.pages.PageManager;
 import com.atlassian.confluence.setup.settings.SettingsManager;
-import com.atlassian.confluence.pages.*;
 import com.atlassian.confluence.spaces.Space;
-import com.atlassian.confluence.user.*;
+import com.atlassian.confluence.user.ConfluenceUser;
 import com.atlassian.spring.container.ContainerManager;
 import com.atlassian.user.EntityException;
 import com.atlassian.user.Group;
 import com.atlassian.user.GroupManager;
 import com.atlassian.user.User;
-import javax.mail.*;
+import lombok.NonNull;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+
+import javax.mail.Message;
+import javax.mail.MessagingException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
+
+import static org.apache.commons.lang.StringEscapeUtils.escapeHtml;
 
 /**
  * Converts email messages to Confluence blog posts.
@@ -25,13 +34,7 @@ public class MessageToBlogPostProcessor {
     /**
      * Configuration to use.
      */
-    @NonNull private MailConfigurationWrapper mailConfigurationWrapper;
-
-    // Autowired components.
-    @Setter private AttachmentManager attachmentManager;
-    @Setter private PageManager pageManager;
-    @Setter private GroupManager groupManager;
-    @Setter private SettingsManager settingsManager;
+    @NonNull @Setter private MailConfigurationWrapper mailConfigurationWrapper;
 
     /**
      * Create a new processor with given mail configuration.
@@ -41,22 +44,19 @@ public class MessageToBlogPostProcessor {
     throws MailConfigurationManagerException
     {
         this.mailConfigurationWrapper = mailConfigurationWrapper;
-
-        // Autowire this object.
-        ContainerManager.autowireComponent(this);
     }
 
     /**
      * Create a blog post from the content and the attachments retrieved from a mail message.
      *
-     * @param space The space into which to post.
+     * @param space A list of spaces into which to post.
      * @param message The Email to process.
      */
     public void process(Space space, Message message)
     throws MessageToBlogPostProcessorException
     {
         try {
-            MessageParser parser = new MessageParser(message, mailConfigurationWrapper);
+            MessageParser parser = newMessageParser(message, mailConfigurationWrapper);
 
             // Get sender.
             User sender = parser.getSender();
@@ -92,7 +92,7 @@ public class MessageToBlogPostProcessor {
             post.setTitle(generateTitle(message, post));
 
             // Save the blog post.
-            pageManager.saveContentEntity(post, new DefaultSaveContext());
+            getPageManager().saveContentEntity(post, new DefaultSaveContext());
 
             boolean found_attachments = false;
             // Link attachments with blog post and set creator.
@@ -104,7 +104,7 @@ public class MessageToBlogPostProcessor {
                         data.getAttachment().setContainer(post);
                         data.getAttachment().setCreator((sender instanceof ConfluenceUser) ? (ConfluenceUser)sender : null);
 
-                        attachmentManager.saveAttachment(data.getAttachment(), null, data.getStream());
+                        getAttachmentManager().saveAttachment(data.getAttachment(), null, data.getStream());
                         found_attachments = true;
                     }
                 }
@@ -116,7 +116,7 @@ public class MessageToBlogPostProcessor {
             // By going through attachments and replacing all cid links in text.
             for (MailPartData data: mailData) {
                 if (data.getAttachment() != null && data.getContentID() != null) {
-                    String url = settingsManager.getGlobalSettings().getBaseUrl() + data.getAttachment().getDownloadPath();
+                    String url = getSettingsManager().getGlobalSettings().getBaseUrl() + data.getAttachment().getDownloadPath();
                     String cid = data.getContentID().replaceFirst("^.*<", "").replaceFirst(">.*$", "");
                     content = content.replace("cid:" + cid, url);
                 }
@@ -159,7 +159,7 @@ public class MessageToBlogPostProcessor {
                 for (MailPartData data: mailData) {
                     if (data.getAttachment() != null) {
                         String title = data.getAttachment().getDisplayTitle();
-                        String url = settingsManager.getGlobalSettings().getBaseUrl() + data.getAttachment().getDownloadPath();
+                        String url = getSettingsManager().getGlobalSettings().getBaseUrl() + data.getAttachment().getDownloadPath();
                         content += "<li><a href=\"" + escapeHtml(url) + "\">" + escapeHtml(title) + "</a></li>";
                     }
                 }
@@ -195,12 +195,12 @@ private void checkSender(User sender)
                     throw new MessageToBlogPostProcessorException("Could not find a confluence user for sender address.");
                 }
 
-                Group group = groupManager.getGroup(mailConfigurationWrapper.getMailConfiguration().getSecurityGroup());
+                Group group = getGroupManager().getGroup(mailConfigurationWrapper.getMailConfiguration().getSecurityGroup());
                 if (group == null) {
                     throw new MessageToBlogPostProcessorException("Invalid group in settings.");
                 }
 
-                if (!groupManager.hasMembership(group, sender)) {
+                if (!getGroupManager().hasMembership(group, sender)) {
                     throw new MessageToBlogPostProcessorException("Sender mail lacks permissions to create blog posts.");
                 }
             }
@@ -241,7 +241,7 @@ private void checkSender(User sender)
                 publishDateCalendar.setTime(post.getCreationDate());
             }
 
-            titleUsed = null != pageManager.getBlogPost(
+            titleUsed = null != getPageManager().getBlogPost(
                 post.getSpaceKey(),
                 title,
                 publishDateCalendar
@@ -264,5 +264,27 @@ private void checkSender(User sender)
         } while(titleUsed);
 
         return title;
+    }
+
+    public MessageParser newMessageParser(Message message, MailConfigurationWrapper mailConfigurationWrapper) {
+        MessageParser parser =  new MessageParser(message, mailConfigurationWrapper);
+        ContainerManager.autowireComponent(parser);
+        return parser;
+    }
+
+    public AttachmentManager getAttachmentManager() {
+        return StaticAccessor.getAttachmentManager();
+    }
+
+    public PageManager getPageManager() {
+        return StaticAccessor.getPageManager();
+    }
+
+    public GroupManager getGroupManager() {
+        return StaticAccessor.getGroupManager();
+    }
+
+    public SettingsManager getSettingsManager() {
+        return StaticAccessor.getSettingsManager();
     }
 }

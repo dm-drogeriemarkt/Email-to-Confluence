@@ -1,17 +1,14 @@
 package ut.de.dm.mail2blog;
 
-import com.atlassian.spring.container.ContainerManager;
 import de.dm.mail2blog.FileTypeBucket;
 import de.dm.mail2blog.FileTypeBucketException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.junit.Assert.*;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ContainerManager.class})
+@RunWith(MockitoJUnitRunner.class)
 public class FileTypeBucketTest
 {
 

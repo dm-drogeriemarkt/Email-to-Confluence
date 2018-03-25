@@ -1,10 +1,15 @@
 package de.dm.mail2blog;
 
-import com.atlassian.sal.api.pluginsettings.PluginSettings;
-import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
+import com.atlassian.bandana.BandanaManager;
+import com.atlassian.confluence.setup.bandana.ConfluenceBandanaContext;
+import com.atlassian.confluence.spaces.Space;
+import com.atlassian.plugin.spring.scanner.annotation.export.ExportAsService;
+import com.atlassian.spring.container.ContainerManager;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.*;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
 import java.util.Map;
 
 /**
@@ -12,22 +17,19 @@ import java.util.Map;
  * in the plugin settings.
  */
 @Slf4j
-public class MailConfigurationManager implements IMailConfigurationManager {
-
+@Component
+@ExportAsService
+public class MailConfigurationManager {
     public static final String PLUGIN_KEY = "de.dm.mail2blog";
-
-    // Autowired objects.
-    @Setter PluginSettingsFactory pluginSettingsFactory;
 
     public MailConfiguration loadConfig()
     {
         MailConfiguration mailConfiguration = null;
 
         try {
-            PluginSettings pluginSettings = pluginSettingsFactory.createGlobalSettings();
             ObjectMapper objectMapper = new ObjectMapper();
-
-            Object object = pluginSettings.get(PLUGIN_KEY);
+            ConfluenceBandanaContext ctx = newGlobalConfluenceBandaContext();
+            Object object = getBandanaManager().getValue(ctx, PLUGIN_KEY);
             if (object instanceof Map) {
                 Map<String, Object> map = (Map) object;
                 mailConfiguration = (MailConfiguration) objectMapper.convertValue(map, MailConfiguration.class);
@@ -53,11 +55,11 @@ public class MailConfigurationManager implements IMailConfigurationManager {
     throws MailConfigurationManagerException
     {
         try {
-            PluginSettings pluginSettings = pluginSettingsFactory.createGlobalSettings();
+            ConfluenceBandanaContext ctx = newGlobalConfluenceBandaContext();
             ObjectMapper objectMapper = new ObjectMapper();
 
             Map<String, Object> map = objectMapper.convertValue(mailConfiguration, Map.class);
-            pluginSettings.put(PLUGIN_KEY, map);
+            getBandanaManager().setValue(ctx, PLUGIN_KEY, map);
         } catch (Exception e) {
             throw new MailConfigurationManagerException("Failed to save configuration", e);
         }
@@ -67,5 +69,16 @@ public class MailConfigurationManager implements IMailConfigurationManager {
             throw new MailConfigurationManagerException("Failed to save configuration.");
         }
 
+    }
+
+    // PluginSettingsManager seems to be broken in newer confluence versions.
+    // This is why bandana manager is used directly.
+    // Couldn't get Autowiring to work for BandanaManager.
+    public BandanaManager getBandanaManager() {
+        return (BandanaManager)ContainerManager.getComponent("bandanaManager");
+    }
+
+    public ConfluenceBandanaContext newGlobalConfluenceBandaContext() {
+        return new ConfluenceBandanaContext((Space) null);
     }
 }

@@ -9,7 +9,6 @@ import com.atlassian.confluence.setup.settings.Settings;
 import com.atlassian.confluence.setup.settings.SettingsManager;
 import com.atlassian.confluence.spaces.Space;
 import com.atlassian.confluence.user.ConfluenceUser;
-import com.atlassian.spring.container.ContainerManager;
 import com.atlassian.user.Group;
 import com.atlassian.user.GroupManager;
 import de.dm.mail2blog.*;
@@ -18,9 +17,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.mail.Message;
 import java.io.ByteArrayInputStream;
@@ -28,13 +25,9 @@ import java.io.InputStream;
 import java.util.ArrayList;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.*;
+import static org.mockito.Mockito.*;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ContainerManager.class, MessageToBlogPostProcessor.class})
-@PowerMockIgnore("javax.security.auth.Subject")
+@RunWith(MockitoJUnitRunner.class)
 public class MessageToBlogPostProcessorTest
 {
 
@@ -65,10 +58,10 @@ public class MessageToBlogPostProcessorTest
     @Mock private Group group;
 
     private void autowire(MessageToBlogPostProcessor processor) {
-        processor.setAttachmentManager(attachmentManager);
-        processor.setPageManager(pageManager);
-        processor.setGroupManager(groupManager);
-        processor.setSettingsManager(settingsManager);
+        doReturn(attachmentManager).when(processor).getAttachmentManager();
+        doReturn(pageManager).when(processor).getPageManager();
+        doReturn(groupManager).when(processor).getGroupManager();
+        doReturn(settingsManager).when(processor).getSettingsManager();
     }
 
     @Before
@@ -77,10 +70,6 @@ public class MessageToBlogPostProcessorTest
         // Mock global base url.
         when(settingsManager.getGlobalSettings()).thenReturn(globalSettings);
         when(globalSettings.getBaseUrl()).thenReturn(BASE_URL);
-
-        // Mock ContainerManager.
-        // So that ContainerManager.autowire(this) doesn't fail in constructor of MessageToBlogPostProcessor.
-        mockStatic(ContainerManager.class);
 
         // Stub content to parse.
         ArrayList<MailPartData> content = new ArrayList<MailPartData>();
@@ -102,10 +91,6 @@ public class MessageToBlogPostProcessorTest
         when(message.getSubject()).thenReturn(MESSAGE_SUBJECT);
         when(messageParser.getContent()).thenReturn(content);
         when(messageParser.getSender()).thenReturn(user);
-
-        // Mock message parser creation.
-        mock(MessageParser.class);
-        whenNew(MessageParser.class).withAnyArguments().thenReturn(messageParser);
     }
 
     /**
@@ -116,7 +101,8 @@ public class MessageToBlogPostProcessorTest
         MailConfiguration mailConfiguration = MailConfiguration.builder().build();
 
         // Generate processor.
-        MessageToBlogPostProcessor processor = new MessageToBlogPostProcessor(new MailConfigurationWrapper(mailConfiguration));
+        MessageToBlogPostProcessor processor = spy(new MessageToBlogPostProcessor(new MailConfigurationWrapper(mailConfiguration)));
+        doReturn(messageParser).when(processor).newMessageParser(any(Message.class), any(MailConfigurationWrapper.class));
         autowire(processor);
 
         // Process message.
@@ -165,7 +151,8 @@ public class MessageToBlogPostProcessorTest
         .build();
 
         // Generate processor.
-        MessageToBlogPostProcessor processor = new MessageToBlogPostProcessor(new MailConfigurationWrapper(mailConfiguration));
+        MessageToBlogPostProcessor processor = spy(new MessageToBlogPostProcessor(new MailConfigurationWrapper(mailConfiguration)));
+        doReturn(messageParser).when(processor).newMessageParser(any(Message.class), any(MailConfigurationWrapper.class));
         autowire(processor);
 
         // Process message.
@@ -191,7 +178,8 @@ public class MessageToBlogPostProcessorTest
         .build();
 
         // Generate processor.
-        MessageToBlogPostProcessor processor = new MessageToBlogPostProcessor(new MailConfigurationWrapper(mailConfiguration));
+        MessageToBlogPostProcessor processor = spy(new MessageToBlogPostProcessor(new MailConfigurationWrapper(mailConfiguration)));
+        doReturn(messageParser).when(processor).newMessageParser(any(Message.class), any(MailConfigurationWrapper.class));
         autowire(processor);
 
         // Process message.
@@ -220,7 +208,8 @@ public class MessageToBlogPostProcessorTest
         user = null;
 
         // Generate processor.
-        MessageToBlogPostProcessor processor = new MessageToBlogPostProcessor(new MailConfigurationWrapper(mailConfiguration));
+        MessageToBlogPostProcessor processor = spy(new MessageToBlogPostProcessor(new MailConfigurationWrapper(mailConfiguration)));
+        doReturn(messageParser).when(processor).newMessageParser(any(Message.class), any(MailConfigurationWrapper.class));
         autowire(processor);
 
         // Try processing message.
@@ -243,7 +232,8 @@ public class MessageToBlogPostProcessorTest
         user = null;
 
         // Generate processor.
-        MessageToBlogPostProcessor processor = new MessageToBlogPostProcessor(new MailConfigurationWrapper(mailConfiguration));
+        MessageToBlogPostProcessor processor = spy(new MessageToBlogPostProcessor(new MailConfigurationWrapper(mailConfiguration)));
+        doReturn(messageParser).when(processor).newMessageParser(any(Message.class), any(MailConfigurationWrapper.class));
         autowire(processor);
 
         // Try processing message.
@@ -267,7 +257,8 @@ public class MessageToBlogPostProcessorTest
         when(groupManager.hasMembership(group, user)).thenReturn(false);
 
         // Generate processor.
-        MessageToBlogPostProcessor processor = new MessageToBlogPostProcessor(new MailConfigurationWrapper(mailConfiguration));
+        MessageToBlogPostProcessor processor = spy(new MessageToBlogPostProcessor(new MailConfigurationWrapper(mailConfiguration)));
+        doReturn(messageParser).when(processor).newMessageParser(any(Message.class), any(MailConfigurationWrapper.class));
         autowire(processor);
 
         // Try processing message.
@@ -290,7 +281,8 @@ public class MessageToBlogPostProcessorTest
         when(groupManager.hasMembership(group, user)).thenReturn(true);
 
         // Generate processor.
-        MessageToBlogPostProcessor processor = new MessageToBlogPostProcessor(new MailConfigurationWrapper(mailConfiguration));
+        MessageToBlogPostProcessor processor = spy(new MessageToBlogPostProcessor(new MailConfigurationWrapper(mailConfiguration)));
+        doReturn(messageParser).when(processor).newMessageParser(any(Message.class), any(MailConfigurationWrapper.class));
         autowire(processor);
 
         // Try processing message.

@@ -1,7 +1,8 @@
 package de.dm.mail2blog;
 
-import lombok.*;
-import lombok.extern.slf4j.*;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.mail.*;
 
