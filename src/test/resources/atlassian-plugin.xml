@@ -5,7 +5,8 @@
         <vendor name="${project.organization.name}" url="${project.organization.url}" />
     </plugin-info>
 
-    <rest key="IntegrationTestRunner" path="/mail2blog-tests" version="1.0">
-        <description>Run mail2blog integration test</description>
+    <resource type="i18n" name="i18n" location="de.dm.mail2blog.mail2blog"/>
+    <rest name="Integration Test Runner" i18n-name-key="integration-test-runner.name" key="integration-test-runner" path="/mail2blog-tests" version="1.0">
+      <description key="integration-test-runner.description">Run mail2blog integration test</description>
     </rest>
 </atlassian-plugin>

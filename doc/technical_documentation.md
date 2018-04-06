@@ -15,6 +15,7 @@ The official atlassian way to run integration tests just proved to be too buggy,
 be used to run an integration test on a test instance. After launching a test instance with `atlas-debug` you
 can access the integration test by url:
 [/confluence/plugins/servlet/restbrowser#/resource/mail2blog-tests-1-0-runtest-testprocess](http://localhost:1990/confluence/plugins/servlet/restbrowser#/resource/mail2blog-tests-1-0-runtest-testprocess).
+Alternatively you can use the `integration-test.sh` script to run integration tests.
 
 ## The Main Process
 

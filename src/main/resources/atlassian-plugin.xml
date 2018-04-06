@@ -1,45 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
 <atlassian-plugin key="${project.groupId}.${project.artifactId}" name="${project.name}" plugins-version="2">
-    <plugin-info>
-        <description>${project.description}</description>
-        <version>${project.version}</version>
-        <vendor name="${project.organization.name}" url="${project.organization.url}" />
-        <param name="configure.url">/admin/plugins/mail2blog/configuration.action</param>
-    </plugin-info>
-
-    <job-config name="Mail to Blog" key="mail2blogTrigger">
-        <job key="mail2BlogJob" perClusterJob="true" />
-        <description>Mail2Blog</description>
-        <schedule cron-expression="0 0/5 * * * ?" jitterSecs="60"/>
-        <managed editable="true" keepingHistory="true" canRunAdhoc="true" canDisable="true"/>
-    </job-config>
-
-    <web-item key="mail2blog-admin-link" name="Mail2Blog" section="system.admin/configuration" weight="1000">
-        <description>Link to the Mail2Blog configuration page</description>
-        <label>Mail2Blog</label>
-        <link linkId="mail2blog-admin-link">/admin/plugins/mail2blog/configuration.action</link>
-    </web-item>
-
-    <xwork name="Configure Mail Action" key="configuration">
-        <description>Actions for editing the mail configuration for the Mail to Blog Plugin.</description>
-
-         <package name="mail2blog" extends="default" namespace="/admin/plugins/mail2blog">
-            <default-interceptor-ref name="defaultStack" />
-
-            <action name="configuration" class="de.dm.mail2blog.ConfigurationAction" method="doDefault" roles-required="admin">
-                <result name="input" type="velocity">/templates/extra/mail2blog/configuration.vm</result>
-            </action>
-
-            <action name="doConfiguration" class="de.dm.mail2blog.ConfigurationAction" roles-required="admin">
-                <interceptor-ref name="validatingStack" />
-                <param name="RequireSecurityToken">true</param>
-                <result name="input" type="velocity">/templates/extra/mail2blog/configuration.vm</result>
-                <result name="success" type="velocity">/templates/extra/mail2blog/configuration.vm</result>
-                <result name="error" type="velocity">/templates/extra/mail2blog/configuration.vm</result>
-            </action>
-        </package>
-    </xwork>
-
-    <rest key="Mail2BlogRun" path="/mail2blog" version="1.0">
-        <description>Run mail2blog job</description>
-    </rest>
+  <plugin-info>
+    <description>${project.description}</description>
+    <version>${project.version}</version>
+    <vendor name="${project.organization.name}" url="${project.organization.url}"/>
+    <param name="configure.url">/admin/plugins/mail2blog/configuration.action</param>
+  </plugin-info>
+  <job-config name="Mail to Blog" key="mail2blogTrigger">
+    <job key="mail2BlogJob" perClusterJob="true"/>
+    <description>Mail2Blog</description>
+    <schedule cron-expression="0 0/5 * * * ?" jitterSecs="60"/>
+    <managed editable="true" keepingHistory="true" canRunAdhoc="true" canDisable="true"/>
+  </job-config>
+  <web-item key="mail2blog-admin-link" name="Mail2Blog" section="system.admin/configuration" weight="1000">
+    <description>Link to the Mail2Blog configuration page</description>
+    <label>Mail2Blog</label>
+    <link linkId="mail2blog-admin-link">/admin/plugins/mail2blog/configuration.action</link>
+  </web-item>
+  <xwork name="Configure Mail Action" key="configuration">
+    <description>Actions for editing the mail configuration for the Mail to Blog Plugin.</description>
+    <package name="mail2blog" extends="default" namespace="/admin/plugins/mail2blog">
+      <default-interceptor-ref name="defaultStack"/>
+      <action name="configuration" class="de.dm.mail2blog.ConfigurationAction" method="doDefault" roles-required="admin">
+        <result name="input" type="velocity">/templates/extra/mail2blog/configuration.vm</result>
+      </action>
+      <action name="doConfiguration" class="de.dm.mail2blog.ConfigurationAction" roles-required="admin">
+        <interceptor-ref name="validatingStack"/>
+        <param name="RequireSecurityToken">true</param>
+        <result name="input" type="velocity">/templates/extra/mail2blog/configuration.vm</result>
+        <result name="success" type="velocity">/templates/extra/mail2blog/configuration.vm</result>
+        <result name="error" type="velocity">/templates/extra/mail2blog/configuration.vm</result>
+      </action>
+    </package>
+  </xwork>
+  <rest key="Mail2BlogRun" path="/mail2blog" version="1.0">
+    <description>Run mail2blog job</description>
+  </rest>
 </atlassian-plugin>
