@@ -26,12 +26,12 @@ install:
   - atlas-version
 
 env:
-  - INTEGRATION_TEST_CONFLUENCE_VERSION="5.10.9" # lowest supported version
-  - INTEGRATION_TEST_CONFLUENCE_VERSION="6.6.3"  # integration test for latest enterprise release
-  - INTEGRATION_TEST_CONFLUENCE_VERSION="6.8.1"  # latest supported version
+  - VERSION="5.10.9" # lowest supported version
+  - VERSION="6.6.5"  # latest enterprise release
+  - VERSION="6.9.0"    # latest known version
 
 script:
-  - bash integration-test.sh -version $INTEGRATION_TEST_CONFLUENCE_VERSION
+  - bash integration-test.sh -version $VERSION
   - travis_wait 10 atlas-clean # Cleanup after tests
   - travis_wait 30 atlas-package # Build package
   - travis_wait 10 atlas-mvn cobertura:cobertura # Test coverage
