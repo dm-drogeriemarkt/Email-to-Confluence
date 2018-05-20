@@ -248,7 +248,6 @@ public class MessageParser {
 
         Charset charset = getCharsetFromHeader(part.getContentType());
 
-        // Set the blog entry content to this content.
         BufferedReader reader = new BufferedReader(new InputStreamReader(part.getInputStream(), charset));
         String line;
         String html = "";

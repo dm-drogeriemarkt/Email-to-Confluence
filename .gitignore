@@ -16,5 +16,5 @@ Thumbs.db
 .idea
 *.iml
 
-# Tests
+# Test log
 test-confluence.log

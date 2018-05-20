@@ -13,7 +13,7 @@ import javax.mail.Message;
 import java.util.List;
 
 /**
- * Transaction that processes an email message and creates a Confluence blog post from it.
+ * Transaction that processes an email message and creates Confluence pages/blog posts from it.
  * Called by Mail2BlogJob.
  */
 @Log4j
@@ -22,23 +22,23 @@ public class MessageTransaction implements TransactionCallback<Void> {
     @Getter @NonNull private Message message;
     @Getter @NonNull private MailConfigurationWrapper mailConfigurationWrapper;
     @Getter @NonNull private Mailbox mailbox;
-    @Getter @NonNull @Autowired private SpaceKeyExtractor spaceKeyExtractor;
+    @Getter @NonNull @Autowired private SpaceExtractor spaceExtractor;
 
     public Void doInTransaction() {
         boolean status = true;
 
         try {
             // Get space
-            List<Space> spaces = spaceKeyExtractor.getSpaces(mailConfigurationWrapper, message);
+            List<SpaceInfo> spaceInfos = spaceExtractor.getSpaces(mailConfigurationWrapper, message);
 
-            if (spaces.isEmpty()) {
+            if (spaceInfos.isEmpty()) {
                 log.error("Mail2Blog: Failed to process message. Failed to get a valid space.");
                 status = false;
             } else {
-                for (Space space : spaces) {
+                for (SpaceInfo spaceInfo : spaceInfos) {
                     // Process message.
-                    MessageToBlogPostProcessor processor = newMessageToBlogProcessor(mailConfigurationWrapper);
-                    processor.process(space, message);
+                    MessageToContentProcessor processor = newMessageToBlogProcessor(mailConfigurationWrapper);
+                    processor.process(spaceInfo.getSpace(), message, spaceInfo.getContentType());
                 }
             }
         } catch (Exception e) {
@@ -59,9 +59,9 @@ public class MessageTransaction implements TransactionCallback<Void> {
         return null;
     }
 
-    public MessageToBlogPostProcessor newMessageToBlogProcessor(MailConfigurationWrapper mailConfigurationWrapper)
+    public MessageToContentProcessor newMessageToBlogProcessor(MailConfigurationWrapper mailConfigurationWrapper)
     throws MailConfigurationManagerException {
-        MessageToBlogPostProcessor processor = new MessageToBlogPostProcessor(mailConfigurationWrapper);
+        MessageToContentProcessor processor = new MessageToContentProcessor(mailConfigurationWrapper);
         ContainerManager.autowireComponent(processor);
         return processor;
     }

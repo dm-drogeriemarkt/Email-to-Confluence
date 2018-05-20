@@ -29,6 +29,7 @@ public class MailConfiguration {
     @NonNull private boolean secure; // Use IMAPs or POP3s
     @NonNull private boolean checkCertificates; // Check SSL certificates
     @NonNull private String defaultSpace;
+    @NonNull private String defaultContentType;
 
     // If set to true, the gallerymacro will be added to posts containing images.
     @NonNull private boolean gallerymacro;
@@ -93,6 +94,7 @@ public class MailConfiguration {
         private String username = "";
         private String password = "";
         private String defaultSpace = "";
+        private String defaultContentType = ContentTypes.BlogPost;
         private boolean gallerymacro = false;
         private boolean htmlmacro = false;
         private boolean spaceKeyInAddress = false;

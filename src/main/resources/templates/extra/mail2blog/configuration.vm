@@ -2,7 +2,7 @@ $webResourceManager.requireResource("com.atlassian.auiplugin:aui-select2")
 
 <html>
     <head>
-        <title>Mail to Blog Configuration</title>
+        <title>Email to Confluence Configuration</title>
         <meta name="decorator" content="atl.admin" />
         <script type="text/javascript">
             function updateSpacesOptions(tr) {
@@ -57,19 +57,19 @@ $webResourceManager.requireResource("com.atlassian.auiplugin:aui-select2")
 
                 tr.append(buttons);
 
-                tr.append(AJS.$('<td>', {width:"18%"}).html(AJS.$("<select>", {
+                tr.append(AJS.$('<td>', {width:"13%"}).html(AJS.$("<select>", {
                     class: "spaceRules.field",
                     name: "spaceRuleFields",
                     html: '<option value="from">From</option><option value="to">TO</option><option value="cc">CC</option><option value="subject">Subject</option><option value="to/cc">TO or CC</option>'
                 })));
 
-                tr.append(AJS.$('<td>', {width:"18%"}).html(AJS.$("<select>", {
+                tr.append(AJS.$('<td>', {width:"13%"}).html(AJS.$("<select>", {
                     class: "spaceRules.operator",
                     name: "spaceRuleOperators",
                     html: '<option value="is">is equal to</option><option value="contains">contains</option><option value="start">starts with</option><option value="end">ends with</option><option value="regexp">matches regexp</option>'
                 })));
 
-                tr.append(AJS.$('<td>', {width:"18%"}).html(AJS.$("<input>", {
+                tr.append(AJS.$('<td>', {width:"13%"}).html(AJS.$("<input>", {
                     class: "text spaceRules.value",
                     name: "spaceRuleValues"
                 })));
@@ -91,10 +91,13 @@ $webResourceManager.requireResource("com.atlassian.auiplugin:aui-select2")
 
                 AJS.$("#spaceRules tbody").append(tr);
 
-                tr.find(".spaceRules\\.field").auiSelect2();
-                tr.find(".spaceRules\\.operator").auiSelect2();
+                tr.append(AJS.$("<td>").html('<select class="spaceRules.contentType" name="spaceRuleContentTypes"><option value="blog">Blog Post</option><option value="page">Page</option></select>'));
+
+                tr.find(".spaceRules\\.field").auiSelect2({minimumResultsForSearch: -1});
+                tr.find(".spaceRules\\.operator").auiSelect2({minimumResultsForSearch: -1});
                 tr.find(".spaceRules\\.space").auiSelect2();
-                tr.find(".spaceRules\\.action").auiSelect2();
+                tr.find(".spaceRules\\.action").auiSelect2({minimumResultsForSearch: -1});
+                tr.find(".spaceRules\\.contentType").auiSelect2({minimumResultsForSearch: -1});
                 updateSpacesOptions(tr);
             }
 
@@ -135,11 +138,14 @@ $webResourceManager.requireResource("com.atlassian.auiplugin:aui-select2")
             AJS.$(document).ready(function() {
 
                 AJS.$("#mailConfiguration\\.defaultSpace").auiSelect2();
+                AJS.$("#mailConfiguration\\.defaultContentType").auiSelect2({minimumResultsForSearch: -1});
                 AJS.$("#mailConfiguration\\.securityGroup").auiSelect2();
-                AJS.$(".spaceRules\\.field").auiSelect2();
-                AJS.$(".spaceRules\\.operator").auiSelect2();
+                AJS.$("#mailConfiguration\\.protocol").auiSelect2({minimumResultsForSearch: -1});
+                AJS.$(".spaceRules\\.field").auiSelect2({minimumResultsForSearch: -1});
+                AJS.$(".spaceRules\\.operator").auiSelect2({minimumResultsForSearch: -1});
                 AJS.$(".spaceRules\\.space").auiSelect2();
-                AJS.$(".spaceRules\\.action").auiSelect2();
+                AJS.$(".spaceRules\\.action").auiSelect2({minimumResultsForSearch: -1});
+                AJS.$(".spaceRules\\.contentType").auiSelect2({minimumResultsForSearch: -1});
 
                 // Init space options.
                 AJS.$("#spaceRules tr").each(function() {
@@ -323,11 +329,11 @@ $webResourceManager.requireResource("com.atlassian.auiplugin:aui-select2")
                 <fieldset class="group">
                     <div class="field-group">
                         <label for="mailConfiguration.protocol">Protocol</label>
-                        <select class="select" id="mailConfiguration.protocol" name="mailConfiguration.protocol" onchange="selectPort()">
+                        <div style="max-width: 250px"><select class="select" id="mailConfiguration.protocol" name="mailConfiguration.protocol" onchange="selectPort()">
                             #foreach($p in ["IMAP", "POP3"])
                                 <option value="${p.toLowerCase()}" #if($mailConfiguration.protocol == $p.toLowerCase()) selected="selected" #end>${p}</option>
                             #end
-                        </select>
+                        </select></div>
                         #foreach ($error in $fieldErrors.get("mailConfiguration.protocol")) <div class="error">$error</div> #end
                     </div>
                 </fieldset>
@@ -371,8 +377,7 @@ $webResourceManager.requireResource("com.atlassian.auiplugin:aui-select2")
                 <fieldset>
                     <div class="field-group">
                         <label for="mailConfiguration.defaultSpace">Default Space <span class="aui-icon icon-required">required</span></label>
-
-                        <select id="mailConfiguration.defaultSpace" name="mailConfiguration.defaultSpace">
+                        <div style="max-width: 250px"><select id="mailConfiguration.defaultSpace" name="mailConfiguration.defaultSpace">
                             #foreach($space in $spaces.entrySet())
                                 <option
                                     value="${space.key}"
@@ -383,7 +388,7 @@ $webResourceManager.requireResource("com.atlassian.auiplugin:aui-select2")
                                     ${space.value}
                                 </option>
                             #end
-                        </select>
+                        </select></div>
 
                         <div class="description">
                             #if ($spaces.isEmpty())
@@ -405,6 +410,22 @@ $webResourceManager.requireResource("com.atlassian.auiplugin:aui-select2")
 
                         #foreach ($error in $fieldErrors.get("mailConfiguration.defaultSpace")) <div class="error">$error</div> #end
 
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <div class="field-group">
+                        <label for="mailConfiguration.defaultContentType">Default Type <span class="aui-icon icon-required">required</span></label>
+                        <div style="max-width: 250px"><select id="mailConfiguration.defaultContentType" name="mailConfiguration.defaultContentType">
+                            <option #if ($mailConfiguration.defaultContentType == "blog") selected="selected" #end value="blog">Blog Post</option>
+                            <option #if ($mailConfiguration.defaultContentType == "page") selected="selected" #end value="page">Page</option>
+                        </select></div>
+
+                        <div class="description">
+                            Default <a href="https://confluence.atlassian.com/doc/pages-and-blogs-320602215.html">Type of Content</a> to use
+                        </div>
+
+                        #foreach ($error in $fieldErrors.get("mailConfiguration.defaultContentType")) <div class="error">$error</div> #end
                     </div>
                 </fieldset>
             </div>
@@ -447,13 +468,14 @@ $webResourceManager.requireResource("com.atlassian.auiplugin:aui-select2")
                                 </p>
                             </noscript>
                             <fieldset class="group" style="padding: 0">
-                                <table id="spaceRules" class="aui">
+                                <table id="spaceRules" class="aui" style="table-layout: fixed">
                                     <thead>
                                         <tr>
-                                            <th width="16%">&nbsp;</th>
-                                            <th width="54%" colspan="3">Condition<sup><a href="#capturing-condition">1</a></sup></th>
-                                            <th width="10%">Action</th>
-                                            <th width="20%">Space<sup><a href="#capturing-groups">2</a></sup></th>
+                                            <th width="22%">&nbsp;</th>
+                                            <th width="39%" colspan="3">Condition<sup><a href="#capturing-condition">1</a></sup></th>
+                                            <th width="13%">Action</th>
+                                            <th width="13%">Space<sup><a href="#capturing-groups">2</a></sup></th>
+                                            <th width="13%">Type</th>
                                         </tr>
                                     </thead>
 
@@ -471,21 +493,21 @@ $webResourceManager.requireResource("com.atlassian.auiplugin:aui-select2")
                                                     <span class="aui-icon aui-icon-small aui-iconfont-arrows-down"></span>
                                                 </button>
                                             </td>
-                                            <td width="18%"><select class="spaceRules.field" name="spaceRuleFields">
+                                            <td width="13%"><select class="spaceRules.field" name="spaceRuleFields">
                                                 <option #if ($rule.field == "from")    selected="selected" #end value="from">From</option>
                                                 <option #if ($rule.field == "to")      selected="selected" #end value="to">TO</option>
                                                 <option #if ($rule.field == "cc")      selected="selected" #end value="cc">CC</option>
                                                 <option #if ($rule.field == "subject") selected="selected" #end value="subject">Subject</option>
                                                 <option #if ($rule.field == "to/cc")   selected="selected" #end value="to/cc">TO or CC</option>
                                             </select></td>
-                                            <td width="18%"><select class="spaceRules.operator" name="spaceRuleOperators">
+                                            <td width="13%"><select class="spaceRules.operator" name="spaceRuleOperators">
                                                 <option #if ($rule.operator == "is")       selected="selected" #end value="is">is equal to</option>
                                                 <option #if ($rule.operator == "contains") selected="selected" #end value="contains">contains</option>
                                                 <option #if ($rule.operator == "start")    selected="selected" #end value="start">starts with</option>
                                                 <option #if ($rule.operator == "end")      selected="selected" #end value="end">ends with</option>
                                                 <option #if ($rule.operator == "regexp")   selected="selected" #end value="regexp">matches regexp</option>
                                             </select></td>
-                                            <td width="18%"><input class="text spaceRules.value" name="spaceRuleValues" value="${rule.value}"></td>
+                                            <td width="13%"><input class="text spaceRules.value" name="spaceRuleValues" value="${rule.value}"></td>
                                             <td><select class="spaceRules.action" name="spaceRuleActions">
                                                 <option #if ($rule.action == "move") selected="selected" #end value="move">move to</option>
                                                 <option #if ($rule.action == "copy") selected="selected" #end value="copy">copy to</option>
@@ -510,12 +532,16 @@ $webResourceManager.requireResource("com.atlassian.auiplugin:aui-select2")
                                                     #end
                                                 </optgroup>
                                             </select></td>
+                                            <td><select class="spaceRules.contentType" name="spaceRuleContentTypes">
+                                                <option #if ($rule.contentType == "blog") selected="selected" #end value="blog">Blog Post</option>
+                                                <option #if ($rule.contentType == "page") selected="selected" #end value="page">Page</option>
+                                            </select></td>
                                         </tr>
                                         #end
                                     </tbody>
                                     <tfoot>
                                         <tr>
-                                            <td colspan="6">
+                                            <td colspan="7">
                                                 <button type="button" class="aui-button" id="spaceRules.add">
                                                     <span class="aui-icon aui-icon-small aui-iconfont-add"></span>&nbsp;Add&nbsp;Rule
                                                 </button>
@@ -856,7 +882,7 @@ $webResourceManager.requireResource("com.atlassian.auiplugin:aui-select2")
 
                             <div class="field-group">
                                 <label for="mailConfiguration.securityGroup">Group</label>
-                                <select id="mailConfiguration.securityGroup" name="mailConfiguration.securityGroup">
+                                <div style="max-width: 250px"><select id="mailConfiguration.securityGroup" name="mailConfiguration.securityGroup">
                                     <option
                                             value=""
                                             #if($mailConfiguration.securityGroup == "")
@@ -875,7 +901,7 @@ $webResourceManager.requireResource("com.atlassian.auiplugin:aui-select2")
                                             ${group}
                                         </option>
                                     #end
-                                </select>
+                                </select></div>
                                 <div class="description">Choose <strong>confluence-users</strong> to allow all registered users</div>
                                 #foreach ($error in $fieldErrors.get("mailConfiguration.securityGroup")) <div class="error">$error</div> #end
                         </div>

@@ -1,18 +1,19 @@
 package it.de.dm.mail2blog;
 
 import com.atlassian.confluence.pages.BlogPost;
+import com.atlassian.confluence.pages.Page;
 import com.atlassian.confluence.spaces.Space;
 import com.atlassian.user.User;
 import com.atlassian.user.impl.DefaultUser;
 import com.atlassian.user.security.password.Credential;
-import de.dm.mail2blog.MailConfiguration;
-import de.dm.mail2blog.StaticAccessor;
+import de.dm.mail2blog.*;
 import de.saly.javamail.mock2.MailboxFolder;
 import de.saly.javamail.mock2.MockMailbox;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.mail.internet.MimeMessage;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -28,11 +29,12 @@ public class IntegrationTest
 {
     MailConfiguration mailConfiguration;
     User user;
-    Space space;
+    HashMap<String, Space> spaces = new HashMap<String, Space>();;
     MockMailbox mockMailbox;
 
     private static final int MESSAGE_COUNT = 2;
-    private static final String SPACE_KEY = "testMail2blog";
+    private static final String SPACE_KEY_A = "testMail2blog";
+    private static final String SPACE_KEY_B = "testMail2blog2";
     private static final String USERNAME = "testMail2blog";
     private static final String EMAIL = "bob@example.org";
 
@@ -47,7 +49,18 @@ public class IntegrationTest
         .password("password")
         .protocol("mock_imap")
         .emailaddress(EMAIL)
-        .defaultSpace(SPACE_KEY)
+        .defaultSpace(SPACE_KEY_A)
+        .defaultContentType(ContentTypes.BlogPost)
+        .spaceRules(new SpaceRule[]{
+            SpaceRule.builder()
+            .field(SpaceRuleFields.SUBJECT)
+            .operator(SpaceRuleOperators.Is)
+            .value("Hello")
+            .action(SpaceRuleActions.MOVE)
+            .space(SPACE_KEY_B)
+            .contentType(ContentTypes.Page)
+            .build()
+        })
         .build();
     }
 
@@ -103,39 +116,49 @@ public class IntegrationTest
     }
 
     /**
-     * Create the test space.
+     * Create the test spaces.
      */
-    private void setUpSpace() throws Exception {
-        space = StaticAccessor.getSpaceManager().getSpace(SPACE_KEY);
-        tearDownSpace();
-        if (space == null) {
-            space = StaticAccessor.getSpaceManager().createSpace(SPACE_KEY, SPACE_KEY, "Mail2Blog Test Space", user);
-            StaticAccessor.getSpaceManager().saveSpace(space);
+    private void setUpSpaces() throws Exception {
+        tearDownSpaces();
+        for (String key : (new String[]{SPACE_KEY_A, SPACE_KEY_B})) {
+            if (!spaces.containsKey(key)) {
+                Space space = StaticAccessor.getSpaceManager().createSpace(key, key, "Mail2Blog Test Space", user);
+                StaticAccessor.getSpaceManager().saveSpace(space);
+                spaces.put(key, space);
+            }
         }
     }
 
     /**
-     * Remove the test space.
+     * Remove the test spaces.
      */
-    private void tearDownSpace() {
-        if (space != null) {
-            List test = space.getPageTemplates();
-            StaticAccessor.getSpaceManager().removeSpace(space);
-            space = null;
+    private void tearDownSpaces() {
+        for (String key : (new String[]{SPACE_KEY_A, SPACE_KEY_B})) {
+            if (spaces.containsKey(key)) {spaces.remove(key);}
+            Space space = StaticAccessor.getSpaceManager().getSpace(key);
+            if (space != null) {
+                StaticAccessor.getSpaceManager().removeSpace(space);
+            }
         }
     }
 
-    public void validateBlogPosts() throws Exception {
-        List<BlogPost> blogPosts = StaticAccessor.getPageManager().getBlogPosts(space, false);
-        assertEquals("Expected 2 blog posts", 2, blogPosts.size());
+    public void validatePosts() throws Exception {
+        assertNotNull(spaces.get(SPACE_KEY_A));
+        assertNotNull(spaces.get(SPACE_KEY_B));
+
+        List<BlogPost> blogPosts = StaticAccessor.getPageManager().getBlogPosts(spaces.get(SPACE_KEY_A), false);
+        assertEquals("Expected 1 blog posts", 1, blogPosts.size());
 
         BlogPost post1 = blogPosts.get(0);
-        assertEquals("Wrong title on first blog post", "Test", post1.getTitle());
-        assertTrue("Wrong content in first blog post", post1.getBodyAsString().contains("<p>Lieber Bob,</p>"));
+        assertEquals("Wrong title on blog post", "Test", post1.getTitle());
+        assertTrue("Wrong content in blog post", post1.getBodyAsString().contains("<p>Lieber Bob,</p>"));
 
-        BlogPost post2 = blogPosts.get(1);
-        assertEquals("Wrong title on second blog post", "Hello", post2.getTitle());
-        assertTrue("Wrong content in second blog post", post2.getBodyAsString().contains("Hello World"));
+        List<Page> pages = StaticAccessor.getPageManager().getPages(spaces.get(SPACE_KEY_B), false);
+        assertEquals("Expected 2 pages", 2, pages.size());
+
+        Page page1 = pages.get(1);
+        assertEquals("Wrong title on page", "Hello", page1.getTitle());
+        assertTrue("Wrong content in page", page1.getBodyAsString().contains("Hello World"));
     }
 
     public void validateMailbox() throws Exception {
@@ -149,25 +172,21 @@ public class IntegrationTest
         setUpMailbox();
         setUpConfiguration();
         setUpUser();
-        setUpSpace();
+        setUpSpaces();
     }
 
     public void testProcess() throws Exception
     {
-        try {
-            // Save the configuration
-            StaticAccessor.getMailConfigurationManager().saveConfig(mailConfiguration);
+        // Save the configuration
+        StaticAccessor.getMailConfigurationManager().saveConfig(mailConfiguration);
 
-            // Reset global state, so that config gets fetched from disk.
-            StaticAccessor.getGlobalState().setMailConfigurationWrapper(null);
+        // Reset global state, so that config gets fetched from disk.
+        StaticAccessor.getGlobalState().setMailConfigurationWrapper(null);
 
-            // Run job
-            StaticAccessor.getMail2BlogJob().runJob(null);
+        // Run job
+        StaticAccessor.getMail2BlogJob().runJob(null);
 
-            validateBlogPosts();
-            validateMailbox();
-        } catch (Exception e) {
-            fail("Exception in testProcess(): " + e.getMessage());
-        }
+        validatePosts();
+        validateMailbox();
     }
 }

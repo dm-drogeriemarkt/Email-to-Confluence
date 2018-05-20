@@ -192,6 +192,9 @@ public class ConfigurationActionTest
         assertValidate("mailConfiguration.defaultSpace", SPACE2_KEY, true);
         assertValidate("mailConfiguration.defaultSpace", "bogus", false);
         assertValidate("mailConfiguration.defaultSpace", "", false);
+        assertValidate("mailConfiguration.defaultContentType", "blog", true);
+        assertValidate("mailConfiguration.defaultContentType", "page", true);
+        assertValidate("mailConfiguration.defaultContentType", "bogus", false);
         assertValidate("mailConfiguration.maxAllowedAttachmentSize", 123, true);
         assertValidate("mailConfiguration.maxAllowedAttachmentSize", -1, false);
         assertValidate("mailConfiguration.maxAllowedAttachmentSize", 3000, false);
@@ -212,22 +215,23 @@ public class ConfigurationActionTest
      */
     @Test
     public void testValidateSpaceRules() throws Exception {
-        assertSpaceRule("from", "is", "alpha", "copy", SPACE1_KEY, true);
-        assertSpaceRule("to", "contains", "bravo", "move", SPACE1_KEY, true);
-        assertSpaceRule("cc", "start", "charlie", "copy", SPACE2_KEY, true);
-        assertSpaceRule("subject", "end", "delta", "copy", SPACE2_KEY, true);
+        assertSpaceRule("from", "is", "alpha", "copy", SPACE1_KEY, "blog", true);
+        assertSpaceRule("to", "contains", "bravo", "move", SPACE1_KEY, "blog", true);
+        assertSpaceRule("cc", "start", "charlie", "copy", SPACE2_KEY, "blog", true);
+        assertSpaceRule("subject", "end", "delta", "copy", SPACE2_KEY, "blog", true);
 
-        assertSpaceRule("from", "regexp", "^echo", "copy", SPACE1_KEY, true);
-        assertSpaceRule("from", "regexp", "echo$", "copy", SpaceRuleSpaces.CapturingGroup0, true);
-        assertSpaceRule("from", "regexp", "echo ([0-9]*)", "copy", SpaceRuleSpaces.CapturingGroup1, true);
+        assertSpaceRule("from", "regexp", "^echo", "copy", SPACE1_KEY, "blog", true);
+        assertSpaceRule("from", "regexp", "echo$", "copy", SpaceRuleSpaces.CapturingGroup0, "page", true);
+        assertSpaceRule("from", "regexp", "echo ([0-9]*)", "copy", SpaceRuleSpaces.CapturingGroup1, "page", true);
 
-        assertSpaceRule("bogus", "is", "alpha", "copy", SPACE1_KEY, false); // Invalid field
-        assertSpaceRule("from", "nonsense", "alpha", "copy", SPACE1_KEY, false); // Invalid operator
-        assertSpaceRule("from", "is", "alpha", "notworking", SPACE1_KEY, false); // Invalid action
-        assertSpaceRule("from", "is", "alpha", "copy", "nirvana", false); // Invalid space
-        assertSpaceRule("from", "is", "alpha", "copy", SpaceRuleSpaces.CapturingGroup0, false); // Capturing group not on regexp
-        assertSpaceRule("cc", "start", "charlie", "move", SpaceRuleSpaces.CapturingGroup1, false); // Capturing group not on regexp
-        assertSpaceRule("from", "regexp", "^(unclosed group", "copy", SPACE1_KEY, false); // Invalid regexp
+        assertSpaceRule("bogus", "is", "alpha", "copy", SPACE1_KEY, "blog", false); // Invalid field
+        assertSpaceRule("from", "nonsense", "alpha", "copy", SPACE1_KEY, "blog",false); // Invalid operator
+        assertSpaceRule("from", "is", "alpha", "notworking", SPACE1_KEY, "blog", false); // Invalid action
+        assertSpaceRule("from", "is", "alpha", "copy", "nirvana", "blog", false); // Invalid space
+        assertSpaceRule("from", "is", "alpha", "copy", SpaceRuleSpaces.CapturingGroup0, "blog",false); // Capturing group not on regexp
+        assertSpaceRule("cc", "start", "charlie", "move", SpaceRuleSpaces.CapturingGroup1, "blog",false); // Capturing group not on regexp
+        assertSpaceRule("from", "regexp", "^(unclosed group", "copy", SPACE1_KEY, "blog",false); // Invalid regexp
+        assertSpaceRule("from", "is", "alpha", "copy", SPACE1_KEY, "bogus", false); // Invalid contentType
     }
 
     /**
@@ -265,12 +269,13 @@ public class ConfigurationActionTest
     /**
      * Check that space rules are validated properly.
      */
-    private void assertSpaceRule(String field, String operator, String value, String action, String space, boolean expectedResult) throws Exception {
+    private void assertSpaceRule(String field, String operator, String value, String action, String space, String contentType, boolean expectedResult) throws Exception {
         configurationAction.setSpaceRuleFields(new String[]{field});
         configurationAction.setSpaceRuleOperators(new String[]{operator});
         configurationAction.setSpaceRuleValues(new String[]{value});
         configurationAction.setSpaceRuleActions(new String[]{action});
         configurationAction.setSpaceRuleSpaces(new String[]{space});
+        configurationAction.setSpaceRuleContentTypes(new String[]{contentType});
 
         // Reset errors and validate.
         configurationAction.setFieldErrors(new HashMap<String, String>());
@@ -289,6 +294,7 @@ public class ConfigurationActionTest
         jsonSpaceRule.put("value", value);
         jsonSpaceRule.put("action", action);
         jsonSpaceRule.put("space", space);
+        jsonSpaceRule.put("contentType", contentType);
 
         if (expectedResult) {
             assertTrue(

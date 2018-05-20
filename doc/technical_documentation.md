@@ -1,6 +1,6 @@
 ## Technical Documentation
 
-Further information, **in German**, on the code structure of this project is available [here](konzeption_und_entwicklung_des_confluence_add_ons_mail2blog.pdf).
+Further information (**in German**) on the code structure of this project is available [here](konzeption_und_entwicklung_des_confluence_add_ons_mail2blog.pdf).
 
 ## Compiling
 

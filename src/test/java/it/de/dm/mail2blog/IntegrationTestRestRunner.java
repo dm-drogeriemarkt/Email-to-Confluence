@@ -24,7 +24,7 @@ public class IntegrationTestRestRunner {
             resp.setSuccessful(true);
             resp.setMessage("");
             resp.setStacktrace("");
-        } catch (Exception e) {
+        } catch (Throwable e) {
             resp.setSuccessful(false);
             resp.setMessage(e.toString());
             resp.setStacktrace(getStackTrace(e));

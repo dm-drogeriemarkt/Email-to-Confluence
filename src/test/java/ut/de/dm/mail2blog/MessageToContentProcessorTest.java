@@ -1,10 +1,7 @@
 package ut.de.dm.mail2blog;
 
 import com.atlassian.confluence.core.DefaultSaveContext;
-import com.atlassian.confluence.pages.Attachment;
-import com.atlassian.confluence.pages.AttachmentManager;
-import com.atlassian.confluence.pages.BlogPost;
-import com.atlassian.confluence.pages.PageManager;
+import com.atlassian.confluence.pages.*;
 import com.atlassian.confluence.setup.settings.Settings;
 import com.atlassian.confluence.setup.settings.SettingsManager;
 import com.atlassian.confluence.spaces.Space;
@@ -28,7 +25,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class MessageToBlogPostProcessorTest
+public class MessageToContentProcessorTest
 {
 
     static final String BASE_URL = "http://example.org/";
@@ -57,7 +54,7 @@ public class MessageToBlogPostProcessorTest
     @Mock private Attachment attachment;
     @Mock private Group group;
 
-    private void autowire(MessageToBlogPostProcessor processor) {
+    private void autowire(MessageToContentProcessor processor) {
         doReturn(attachmentManager).when(processor).getAttachmentManager();
         doReturn(pageManager).when(processor).getPageManager();
         doReturn(groupManager).when(processor).getGroupManager();
@@ -101,12 +98,12 @@ public class MessageToBlogPostProcessorTest
         MailConfiguration mailConfiguration = MailConfiguration.builder().build();
 
         // Generate processor.
-        MessageToBlogPostProcessor processor = spy(new MessageToBlogPostProcessor(new MailConfigurationWrapper(mailConfiguration)));
+        MessageToContentProcessor processor = spy(new MessageToContentProcessor(new MailConfigurationWrapper(mailConfiguration)));
         doReturn(messageParser).when(processor).newMessageParser(any(Message.class), any(MailConfigurationWrapper.class));
         autowire(processor);
 
         // Process message.
-        processor.process(space, message);
+        processor.process(space, message, ContentTypes.BlogPost);
 
         // Check that a blog post was saved and capture the saved blog post.
         ArgumentCaptor<BlogPost> argBlog = ArgumentCaptor.forClass(BlogPost.class);
@@ -151,20 +148,20 @@ public class MessageToBlogPostProcessorTest
         .build();
 
         // Generate processor.
-        MessageToBlogPostProcessor processor = spy(new MessageToBlogPostProcessor(new MailConfigurationWrapper(mailConfiguration)));
+        MessageToContentProcessor processor = spy(new MessageToContentProcessor(new MailConfigurationWrapper(mailConfiguration)));
         doReturn(messageParser).when(processor).newMessageParser(any(Message.class), any(MailConfigurationWrapper.class));
         autowire(processor);
 
         // Process message.
-        processor.process(space, message);
+        processor.process(space, message, ContentTypes.Page);
 
         // Capture the saved blog post.
-        ArgumentCaptor<BlogPost> argBlog = ArgumentCaptor.forClass(BlogPost.class);
-        verify(pageManager).saveContentEntity(argBlog.capture(), isA(DefaultSaveContext.class));
+        ArgumentCaptor<Page> argPage = ArgumentCaptor.forClass(Page.class);
+        verify(pageManager).saveContentEntity(argPage.capture(), isA(DefaultSaveContext.class));
 
         assertTrue(
             "Gallery macro not added to blog post",
-            argBlog.getValue().getBodyAsString().contains("<ac:structured-macro ac:name=\"gallery\"")
+            argPage.getValue().getBodyAsString().contains("<ac:structured-macro ac:name=\"gallery\"")
         );
     }
 
@@ -178,12 +175,12 @@ public class MessageToBlogPostProcessorTest
         .build();
 
         // Generate processor.
-        MessageToBlogPostProcessor processor = spy(new MessageToBlogPostProcessor(new MailConfigurationWrapper(mailConfiguration)));
+        MessageToContentProcessor processor = spy(new MessageToContentProcessor(new MailConfigurationWrapper(mailConfiguration)));
         doReturn(messageParser).when(processor).newMessageParser(any(Message.class), any(MailConfigurationWrapper.class));
         autowire(processor);
 
         // Process message.
-        processor.process(space, message);
+        processor.process(space, message, ContentTypes.BlogPost);
 
         // Capture the saved blog post.
         ArgumentCaptor<BlogPost> argBlog = ArgumentCaptor.forClass(BlogPost.class);
@@ -208,15 +205,15 @@ public class MessageToBlogPostProcessorTest
         user = null;
 
         // Generate processor.
-        MessageToBlogPostProcessor processor = spy(new MessageToBlogPostProcessor(new MailConfigurationWrapper(mailConfiguration)));
+        MessageToContentProcessor processor = spy(new MessageToContentProcessor(new MailConfigurationWrapper(mailConfiguration)));
         doReturn(messageParser).when(processor).newMessageParser(any(Message.class), any(MailConfigurationWrapper.class));
         autowire(processor);
 
         // Try processing message.
         try {
-            processor.process(space, message);
+            processor.process(space, message, ContentTypes.BlogPost);
             fail("No exception thrown");
-        } catch (MessageToBlogPostProcessorException e) {}
+        } catch (MessageToContentProcessorException e) {}
     }
 
     /**
@@ -232,14 +229,14 @@ public class MessageToBlogPostProcessorTest
         user = null;
 
         // Generate processor.
-        MessageToBlogPostProcessor processor = spy(new MessageToBlogPostProcessor(new MailConfigurationWrapper(mailConfiguration)));
+        MessageToContentProcessor processor = spy(new MessageToContentProcessor(new MailConfigurationWrapper(mailConfiguration)));
         doReturn(messageParser).when(processor).newMessageParser(any(Message.class), any(MailConfigurationWrapper.class));
         autowire(processor);
 
         // Try processing message.
         try {
-            processor.process(space, message);
-        } catch (MessageToBlogPostProcessorException e) {
+            processor.process(space, message, ContentTypes.BlogPost);
+        } catch (MessageToContentProcessorException e) {
             fail("Failed to post");
         }
     }
@@ -257,15 +254,15 @@ public class MessageToBlogPostProcessorTest
         when(groupManager.hasMembership(group, user)).thenReturn(false);
 
         // Generate processor.
-        MessageToBlogPostProcessor processor = spy(new MessageToBlogPostProcessor(new MailConfigurationWrapper(mailConfiguration)));
+        MessageToContentProcessor processor = spy(new MessageToContentProcessor(new MailConfigurationWrapper(mailConfiguration)));
         doReturn(messageParser).when(processor).newMessageParser(any(Message.class), any(MailConfigurationWrapper.class));
         autowire(processor);
 
         // Try processing message.
         try {
-            processor.process(space, message);
+            processor.process(space, message, ContentTypes.BlogPost);
             fail("No exception thrown");
-        } catch (MessageToBlogPostProcessorException e) {}
+        } catch (MessageToContentProcessorException e) {}
     }
 
     /**
@@ -281,14 +278,14 @@ public class MessageToBlogPostProcessorTest
         when(groupManager.hasMembership(group, user)).thenReturn(true);
 
         // Generate processor.
-        MessageToBlogPostProcessor processor = spy(new MessageToBlogPostProcessor(new MailConfigurationWrapper(mailConfiguration)));
+        MessageToContentProcessor processor = spy(new MessageToContentProcessor(new MailConfigurationWrapper(mailConfiguration)));
         doReturn(messageParser).when(processor).newMessageParser(any(Message.class), any(MailConfigurationWrapper.class));
         autowire(processor);
 
         // Try processing message.
         try {
-            processor.process(space, message);
-        } catch (MessageToBlogPostProcessorException e) {
+            processor.process(space, message, ContentTypes.BlogPost);
+        } catch (MessageToContentProcessorException e) {
             fail("Failed to post");
         }
     }

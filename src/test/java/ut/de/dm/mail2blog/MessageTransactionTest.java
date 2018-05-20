@@ -28,8 +28,8 @@ public class MessageTransactionTest
     private MailConfigurationWrapper mailConfiguration;
     private Mailbox mailbox;
     private Space space;
-    @Mock private MessageToBlogPostProcessor processor;
-    @Mock private SpaceKeyExtractor spaceKeyExtractor;
+    @Mock private MessageToContentProcessor processor;
+    @Mock private SpaceExtractor spaceExtractor;
     private MessageTransaction messageTransaction;
 
     @BeforeClass
@@ -48,13 +48,13 @@ public class MessageTransactionTest
             MailConfiguration.builder().username("alice").emailaddress("alice@example.org").build()
         );
 
-        ArrayList<Space> spaces = new ArrayList<Space>();
-        spaces.add(space);
+        ArrayList<SpaceInfo> spaces = new ArrayList<SpaceInfo>();
+        spaces.add(SpaceInfo.builder().space(space).contentType(ContentTypes.BlogPost).build());
 
-        when(spaceKeyExtractor.getSpaces(mailConfiguration, exampleMessage)).thenReturn(spaces);
+        when(spaceExtractor.getSpaces(mailConfiguration, exampleMessage)).thenReturn(spaces);
 
         messageTransaction = spy(MessageTransaction.builder()
-            .spaceKeyExtractor(spaceKeyExtractor)
+            .spaceExtractor(spaceExtractor)
             .message(exampleMessage)
             .mailbox(mailbox)
             .mailConfigurationWrapper(mailConfiguration)
@@ -71,7 +71,7 @@ public class MessageTransactionTest
     public void testValidProcess() throws Exception {
         messageTransaction.doInTransaction();
 
-        verify(processor).process(space, exampleMessage);
+        verify(processor).process(space, exampleMessage, ContentTypes.BlogPost);
         verify(mailbox).flagAsProcessed(exampleMessage);
         verify(mailbox, never()).flagAsInvalid(any(Message.class));
     }
@@ -82,10 +82,10 @@ public class MessageTransactionTest
      */
     @Test
     public void testNoSpace() throws Exception {
-        when(spaceKeyExtractor.getSpaces(mailConfiguration, exampleMessage)).thenReturn(new ArrayList<Space>());
+        when(spaceExtractor.getSpaces(mailConfiguration, exampleMessage)).thenReturn(new ArrayList<SpaceInfo>());
         messageTransaction.doInTransaction();
 
-        verify(processor, never()).process(any(Space.class), any(Message.class));
+        verify(processor, never()).process(any(Space.class), any(Message.class), any(String.class));
         verify(mailbox).flagAsInvalid(exampleMessage);
         verify(mailbox, never()).flagAsProcessed(any(Message.class));
     }
@@ -95,10 +95,10 @@ public class MessageTransactionTest
      */
     @Test
     public void testProcessorError() throws Exception {
-        doThrow(new MessageToBlogPostProcessorException()).when(processor).process(space, exampleMessage);
+        doThrow(new MessageToContentProcessorException()).when(processor).process(space, exampleMessage, ContentTypes.BlogPost);
         messageTransaction.doInTransaction();
 
-        verify(processor).process(space, exampleMessage);
+        verify(processor).process(space, exampleMessage, ContentTypes.BlogPost);
         verify(mailbox).flagAsInvalid(exampleMessage);
         verify(mailbox, never()).flagAsProcessed(any(Message.class));
     }

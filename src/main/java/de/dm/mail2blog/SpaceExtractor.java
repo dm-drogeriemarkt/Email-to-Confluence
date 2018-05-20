@@ -19,17 +19,17 @@ import java.util.regex.Pattern;
 
 @Slf4j
 @Component
-public class SpaceKeyExtractor {
+public class SpaceExtractor {
     /**
      * @param mailConfigurationWrapper The config to use
      * @param message The mail message from which to extract the space key.
      *
      * @return Returns a list of space keys
      */
-    public List<Space> getSpaces(MailConfigurationWrapper mailConfigurationWrapper, Message message)
+    public List<SpaceInfo> getSpaces(MailConfigurationWrapper mailConfigurationWrapper, Message message)
     {
         // Evaluate space rules.
-        ArrayList<Space> spaces = new ArrayList<Space>();
+        ArrayList<SpaceInfo> spaces = new ArrayList<SpaceInfo>();
         HashMap<String, Void> seenSpaceKeys = new HashMap<String, Void>();
         for (SpaceRule rule : mailConfigurationWrapper.getMailConfiguration().getSpaceRules()) {
             boolean ruleMatched = false;
@@ -53,7 +53,7 @@ public class SpaceKeyExtractor {
                             }
 
                             // Add space.
-                            spaces.add(space);
+                            spaces.add(SpaceInfo.builder().space(space).contentType(rule.getContentType()).build());
                         }
                     }
                 }
@@ -82,7 +82,11 @@ public class SpaceKeyExtractor {
         if (defaultSpace == null) {
             log.warn("Mail2Blog: Invalid default space");
         } else {
-            spaces.add(defaultSpace);
+            spaces.add(SpaceInfo.builder()
+                .space(defaultSpace)
+                .contentType(mailConfigurationWrapper.getMailConfiguration().getDefaultContentType())
+                .build()
+            );
         }
 
         return spaces;

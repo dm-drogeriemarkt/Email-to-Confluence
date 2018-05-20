@@ -3,10 +3,7 @@ package ut.de.dm.mail2blog;
 import com.atlassian.confluence.spaces.Space;
 import com.atlassian.confluence.spaces.SpaceManager;
 import com.atlassian.json.jsonorg.JSONObject;
-import de.dm.mail2blog.MailConfiguration;
-import de.dm.mail2blog.MailConfigurationWrapper;
-import de.dm.mail2blog.SpaceKeyExtractor;
-import de.dm.mail2blog.SpaceRule;
+import de.dm.mail2blog.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,10 +20,10 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SpaceKeyExtractionTest {
+public class SpaceExtractionTest {
 
     @Mock private SpaceManager spaceManager;
-    private SpaceKeyExtractor spaceKeyExtractor;
+    private SpaceExtractor spaceExtractor;
 
     @Before
     public void setUp() throws Exception
@@ -35,8 +32,8 @@ public class SpaceKeyExtractionTest {
         when(spaceManager.getSpace(anyString())).thenReturn(mock(Space.class));
 
         // Create spaceKeyExtractor.
-        spaceKeyExtractor = spy(new SpaceKeyExtractor());
-        doReturn(spaceManager).when(spaceKeyExtractor).getSpaceManager();
+        spaceExtractor = spy(new SpaceExtractor());
+        doReturn(spaceManager).when(spaceExtractor).getSpaceManager();
     }
 
     /**
@@ -49,7 +46,7 @@ public class SpaceKeyExtractionTest {
         .build();
 
         Message message = mock(Message.class);
-        List<Space> spaces = spaceKeyExtractor.getSpaces(new MailConfigurationWrapper(mailConfiguration), message);
+        List<SpaceInfo> spaces = spaceExtractor.getSpaces(new MailConfigurationWrapper(mailConfiguration), message);
 
         assertEquals("Expected to find one space (the default space)", 1, spaces.size());
         verify(spaceManager).getSpace("DefaultSpace");
@@ -95,7 +92,7 @@ public class SpaceKeyExtractionTest {
         for (Object[] m : messages) {
             SpaceManager spaceManager = mock(SpaceManager.class);
             when(spaceManager.getSpace(anyString())).thenReturn(mock(Space.class));
-            doReturn(spaceManager).when(spaceKeyExtractor).getSpaceManager();
+            doReturn(spaceManager).when(spaceExtractor).getSpaceManager();
 
             String from        = (String)m[0];
             String to          = (String)m[1];
@@ -117,10 +114,10 @@ public class SpaceKeyExtractionTest {
             when(message.getSubject()).thenReturn(subject);
 
             // Try to get spaces
-            List<Space> spaces = spaceKeyExtractor.getSpaces(new MailConfigurationWrapper(mailConfiguration), message);
+            List<SpaceInfo> spaceInfos = spaceExtractor.getSpaces(new MailConfigurationWrapper(mailConfiguration), message);
 
             // Check that the right number of spaces where created.
-            assertEquals("Wrong number of spaces found for Message" + jsonMessage.toString(), spaceKeys.length, spaces.size());
+            assertEquals("Wrong number of spaces found for Message" + jsonMessage.toString(), spaceKeys.length, spaceInfos.size());
             for (String spaceKey: spaceKeys) {
                 verify(spaceManager).getSpace(spaceKey);
             }
@@ -145,9 +142,9 @@ public class SpaceKeyExtractionTest {
         Message message = mock(Message.class);
         when(message.getSubject()).thenReturn("SubjectSpace: Hello World");
 
-        List<Space> spaces = spaceKeyExtractor.getSpaces(new MailConfigurationWrapper(mailConfiguration), message);
+        List<SpaceInfo> spaceInfos = spaceExtractor.getSpaces(new MailConfigurationWrapper(mailConfiguration), message);
 
-        assertEquals("Expected to find one space (the space from subject)", 1, spaces.size());
+        assertEquals("Expected to find one space (the space from subject)", 1, spaceInfos.size());
         verify(spaceManager).getSpace("SubjectSpace");
     }
 
@@ -177,7 +174,7 @@ public class SpaceKeyExtractionTest {
         };
         when(message.getRecipients(Message.RecipientType.CC)).thenReturn(recipientsCC);
 
-        List<Space> spaces = spaceKeyExtractor.getSpaces(new MailConfigurationWrapper(mailConfiguration), message);
+        List<SpaceInfo> spaces = spaceExtractor.getSpaces(new MailConfigurationWrapper(mailConfiguration), message);
 
         assertEquals("Expected to find two spaces (one from TO-Header, one from CC-Header)", 2, spaces.size());
         verify(spaceManager).getSpace("paris");

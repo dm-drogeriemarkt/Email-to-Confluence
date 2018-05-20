@@ -1,9 +1,7 @@
 package de.dm.mail2blog;
 
 import com.atlassian.confluence.core.DefaultSaveContext;
-import com.atlassian.confluence.pages.AttachmentManager;
-import com.atlassian.confluence.pages.BlogPost;
-import com.atlassian.confluence.pages.PageManager;
+import com.atlassian.confluence.pages.*;
 import com.atlassian.confluence.setup.settings.SettingsManager;
 import com.atlassian.confluence.spaces.Space;
 import com.atlassian.confluence.user.ConfluenceUser;
@@ -27,10 +25,10 @@ import java.util.UUID;
 import static org.apache.commons.lang.StringEscapeUtils.escapeHtml;
 
 /**
- * Converts email messages to Confluence blog posts.
+ * Converts email messages to Confluence pages/blog posts.
  */
 @Slf4j
-public class MessageToBlogPostProcessor {
+public class MessageToContentProcessor {
     /**
      * Configuration to use.
      */
@@ -40,20 +38,21 @@ public class MessageToBlogPostProcessor {
      * Create a new processor with given mail configuration.
      * @param mailConfigurationWrapper the config to use.
      */
-    public MessageToBlogPostProcessor(MailConfigurationWrapper mailConfigurationWrapper)
+    public MessageToContentProcessor(MailConfigurationWrapper mailConfigurationWrapper)
     throws MailConfigurationManagerException
     {
         this.mailConfigurationWrapper = mailConfigurationWrapper;
     }
 
     /**
-     * Create a blog post from the content and the attachments retrieved from a mail message.
+     * Create a page or blog post from the content and the attachments retrieved from a mail message.
      *
      * @param space A list of spaces into which to post.
      * @param message The Email to process.
+     * @param contentType ContentType to create
      */
-    public void process(Space space, Message message)
-    throws MessageToBlogPostProcessorException
+    public void process(Space space, Message message, String contentType)
+    throws MessageToContentProcessorException
     {
         try {
             MessageParser parser = newMessageParser(message, mailConfigurationWrapper);
@@ -67,15 +66,22 @@ public class MessageToBlogPostProcessor {
             List<MailPartData> mailData = parser.getContent();
 
             // Create the blogPost and add values.
-            BlogPost post = new BlogPost();
+            AbstractPage page;
+            if (ContentTypes.Page.equals(contentType)) {
+                page = new Page();
+            } else if (ContentTypes.BlogPost.equals(contentType)) {
+                    page = new BlogPost();
+            } else {
+                throw new MessageToContentProcessorException("invalid content contentType");
+            }
 
-            // Set the creation date of the blog post to the current date.
-            post.setCreationDate(new Date());
+            // Set the creation date of the page/blog post to the current date.
+            page.setCreationDate(new Date());
 
-            // Set the space where to save the blog post.
-            post.setSpace(space);
+            // Set the space where to save the page/blog post.
+            page.setSpace(space);
 
-            // Generate blog post.
+            // Generate page/blog post.
             String content = "";
 
             // Add html.
@@ -86,22 +92,22 @@ public class MessageToBlogPostProcessor {
             }
 
             // Set creator.
-            post.setCreator((sender instanceof ConfluenceUser) ? (ConfluenceUser)sender : null);
+            page.setCreator((sender instanceof ConfluenceUser) ? (ConfluenceUser)sender : null);
 
             // Set the title.
-            post.setTitle(generateTitle(message, post));
+            page.setTitle(generateTitle(message, page));
 
-            // Save the blog post.
-            getPageManager().saveContentEntity(post, new DefaultSaveContext());
+            // Save the page/blog post.
+            getPageManager().saveContentEntity(page, new DefaultSaveContext());
 
             boolean found_attachments = false;
-            // Link attachments with blog post and set creator.
-            // we have to save the blog post before we can add the attachments,
+            // Link attachments with page/blog post and set creator.
+            // we have to save the page/blog post before we can add the attachments,
             // because attachments need to be attached to a content.
             try {
                 for (MailPartData data: mailData) {
                     if (data.getAttachment() != null) {
-                        data.getAttachment().setContainer(post);
+                        data.getAttachment().setContainer(page);
                         data.getAttachment().setCreator((sender instanceof ConfluenceUser) ? (ConfluenceUser)sender : null);
 
                         getAttachmentManager().saveAttachment(data.getAttachment(), null, data.getStream());
@@ -152,7 +158,7 @@ public class MessageToBlogPostProcessor {
                 }
             }
 
-            // Add list of attachment to the end of the blog post.
+            // Add list of attachment to the end of the page/blog post.
             if (found_attachments) {
                 content += "<h3>Attachments</h3>";
                 content += "<ul>";
@@ -166,13 +172,13 @@ public class MessageToBlogPostProcessor {
                 content += "</ul>";
             }
 
-            log.debug("Mail2Blog: Blog entry content converted:\n" + content);
+            log.debug("Mail2Blog: Page/Blog entry content converted:\n" + content);
 
             // Set content.
-            post.setBodyAsString(content);
+            page.setBodyAsString(content);
 
         } catch (MessageParserException e) {
-            throw new MessageToBlogPostProcessorException(e);
+            throw new MessageToContentProcessorException(e);
         }
     }
 
@@ -180,11 +186,11 @@ public class MessageToBlogPostProcessor {
  * Check that the sender has permission to post.
  *
  * @param sender the user object for the sender
- * @throws MessageToBlogPostProcessorException
+ * @throws MessageToContentProcessorException
  *  If the user hasn't permission to post. Or the check fails.
  */
 private void checkSender(User sender)
-    throws MessageToBlogPostProcessorException
+    throws MessageToContentProcessorException
     {
         try {
             if (
@@ -192,33 +198,33 @@ private void checkSender(User sender)
                 && !mailConfigurationWrapper.getMailConfiguration().getSecurityGroup().isEmpty()
             ) {
                 if (sender == null) {
-                    throw new MessageToBlogPostProcessorException("Could not find a confluence user for sender address.");
+                    throw new MessageToContentProcessorException("Could not find a confluence user for sender address.");
                 }
 
                 Group group = getGroupManager().getGroup(mailConfigurationWrapper.getMailConfiguration().getSecurityGroup());
                 if (group == null) {
-                    throw new MessageToBlogPostProcessorException("Invalid group in settings.");
+                    throw new MessageToContentProcessorException("Invalid group in settings.");
                 }
 
                 if (!getGroupManager().hasMembership(group, sender)) {
-                    throw new MessageToBlogPostProcessorException("Sender mail lacks permissions to create blog posts.");
+                    throw new MessageToContentProcessorException("Sender mail lacks permissions to create pages/blog posts.");
                 }
             }
         } catch (EntityException e) {
-            throw new MessageToBlogPostProcessorException("Failed to check the group membership of the sender.", e);
+            throw new MessageToContentProcessorException("Failed to check the group membership of the sender.", e);
         }
     }
 
     /**
-     * Generate a title for a blog post, from an email message.
+     * Generate a title for a page, from an email message.
      * Tries to use the subject of the message and adds characters to the title to make
      * sure that the title is unique in the current space.
      *
      * @param message The email to get the subject from
-     * @param post The blog post to generate the title for (used to get the creation date and space).
+     * @param page The page/blog post to generate the title for (used to get the creation date and space).
      *
      */
-    private String generateTitle(Message message, BlogPost post) throws MessageToBlogPostProcessorException {
+    private String generateTitle(Message message, AbstractPage page) throws MessageToContentProcessorException {
         String title = "";
 
         try {
@@ -229,23 +235,30 @@ private void checkSender(User sender)
         }
 
         // Check if the title is already in use.
-        // Copied from @see atlassian.confluence.pages.DefaultPageManager::throwIfDuplicateAbstractPageTitle().
-        // If we try to save the blog post with a title that is already used a runtime exception will
+        // Copied from @see atlassian.confluence.pages.DefaultPageManager.throwIfDuplicateAbstractPageTitle().
+        // If we try to save page/the blog post with a title that is already used a runtime exception will
         // be thrown, that resets the transaction. We must avoid this.
         boolean titleUsed = false;
 
         int i = 0;
         do {
             Calendar publishDateCalendar = Calendar.getInstance();
-            if (post.getCreationDate() != null) {
-                publishDateCalendar.setTime(post.getCreationDate());
+            if (page.getCreationDate() != null) {
+                publishDateCalendar.setTime(page.getCreationDate());
             }
 
-            titleUsed = null != getPageManager().getBlogPost(
-                post.getSpaceKey(),
-                title,
-                publishDateCalendar
-            );
+            if (page instanceof BlogPost) {
+                titleUsed = null != getPageManager().getBlogPost(
+                        page.getSpaceKey(),
+                        title,
+                        publishDateCalendar
+                );
+            } else {
+                 titleUsed = null != getPageManager().getPage(
+                        page.getSpaceKey(),
+                        title
+                );
+            }
 
             // Append a plus to the title 3 times.
             // If that isn't enough to generate a uniq title append a uniq id.
@@ -257,7 +270,7 @@ private void checkSender(User sender)
 
             // If something goes terribly wrong.
             if (i > 4) {
-                throw new MessageToBlogPostProcessorException("Failed to generate a unique title for this blog post. Aborting.");
+                throw new MessageToContentProcessorException("Failed to generate a unique title for this page/blog post. Aborting.");
             }
 
             i++;

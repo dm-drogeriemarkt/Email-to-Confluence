@@ -32,11 +32,12 @@ public class ConfigurationAction extends ConfluenceActionSupport {
 
     // Xwork can easily deserialize to array of strings, but not to arrays of arbitrary objects.
     // Therefore we store the properties of SpaceRule in here.
-    @Setter private String[] spaceRuleFields    = new String[]{};
-    @Setter private String[] spaceRuleOperators = new String[]{};
-    @Setter private String[] spaceRuleValues    = new String[]{};
-    @Setter private String[] spaceRuleSpaces    = new String[]{};
-    @Setter private String[] spaceRuleActions   = new String[]{};
+    @Setter private String[] spaceRuleFields       = new String[]{};
+    @Setter private String[] spaceRuleOperators    = new String[]{};
+    @Setter private String[] spaceRuleValues       = new String[]{};
+    @Setter private String[] spaceRuleSpaces       = new String[]{};
+    @Setter private String[] spaceRuleActions      = new String[]{};
+    @Setter private String[] spaceRuleContentTypes = new String[]{};
 
     /**
      * Triggered when the user accesses the edit form for the first time.
@@ -102,7 +103,13 @@ public class ConfigurationAction extends ConfluenceActionSupport {
         // Validate default space.
         if (spaceManager.getSpace(getMailConfiguration().getDefaultSpace()) == null) {
             addFieldError("mailConfiguration.defaultSpace", "Please choose a valid value");
-            addActionError("Please choose a valid space");
+            addActionError("Please choose a valid default space");
+        }
+
+        // Validate default content type.
+        if (!ContentTypes.validate(getMailConfiguration().getDefaultContentType())) {
+            addFieldError("mailConfiguration.defaultContentType", "Please choose a valid value");
+            addActionError("Please choose a valid default content type");
         }
 
         // Validate attachment limits.
@@ -124,6 +131,7 @@ public class ConfigurationAction extends ConfluenceActionSupport {
             || (spaceRuleFields.length != spaceRuleValues.length)
             || (spaceRuleFields.length != spaceRuleSpaces.length)
             || (spaceRuleFields.length != spaceRuleActions.length)
+            || (spaceRuleFields.length != spaceRuleContentTypes.length)
         ) {
             addActionError("Invalid space rules");
             addFieldError("mailConfiguration.spaceRules", "Invalid space rules");
@@ -134,6 +142,7 @@ public class ConfigurationAction extends ConfluenceActionSupport {
                 String value = spaceRuleValues[i];
                 String space = spaceRuleSpaces[i];
                 String action = spaceRuleActions[i];
+                String contentType = spaceRuleContentTypes[i];
 
                 // Create space rule
                 SpaceRule spaceRule = SpaceRule.builder()
@@ -142,6 +151,7 @@ public class ConfigurationAction extends ConfluenceActionSupport {
                     .value(value)
                     .space(space)
                     .action(action)
+                    .contentType(contentType)
                     .build();
 
                 try {
@@ -162,6 +172,7 @@ public class ConfigurationAction extends ConfluenceActionSupport {
         spaceRuleValues = new String[]{};
         spaceRuleSpaces = new String[]{};
         spaceRuleActions = new String[]{};
+        spaceRuleContentTypes = new String[]{};
 
         // Check that the syntax of the file types is valid.
         try {

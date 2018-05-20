@@ -20,11 +20,12 @@ import java.util.regex.PatternSyntaxException;
 @Builder
 @JsonDeserialize(builder = SpaceRule.SpaceRuleBuilder.class)
 public class SpaceRule {
-    private String field;    // SpaceRuleFields
-    private String operator; // SpaceRuleOperators
-    private String value;    // Value to match against.
-    private String action;   // SpaceRuleActions
-    private String space;    // SpaceRuleSpaces
+    private String field;       // SpaceRuleFields
+    private String operator;    // SpaceRuleOperators
+    private String value;       // Value to match against.
+    private String action;      // SpaceRuleActions
+    private String space;       // SpaceRuleSpaces
+    private String contentType = ContentTypes.BlogPost; // ContentType
 
     /**
      * Check that all fields in space rule are valid.
@@ -44,6 +45,10 @@ public class SpaceRule {
 
         if (!SpaceRuleSpaces.validate(operator, spaceManager, space)) {
             throw new SpaceRuleValidationException("invalid space key '" + space + "'");
+        }
+
+        if (!ContentTypes.validate(contentType)) {
+            throw new SpaceRuleValidationException("invalid content type '" + contentType + "'");
         }
 
         // Check that regexp compiles

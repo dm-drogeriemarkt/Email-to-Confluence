@@ -1,4 +1,4 @@
-<h1 align="center">Mail2Blog</h1>
+<h1 align="center">Email to Confluence</h1>
 
 <p align="center">
     <img src="doc/mail2blog-logo.jpg" alt="Logo" width="33%">
@@ -7,7 +7,7 @@
     <a href="https://codecov.io/gh/dm-drogeriemarkt/Mail2Blog"><img src="https://img.shields.io/codecov/c/github/dm-drogeriemarkt/Mail2Blog.svg" alt="Build Status"></a>
 </p>
 
-Send email to Confluence. This add-on converts emails to Confluence blog posts. Store and reference your weekly/daily/monthly newsletters in Confluence.
+Send email to Confluence. This add-on converts emails to Confluence pages or blog posts. Store and reference your weekly/daily/monthly newsletters in Confluence.
 
 <p align="center">
     <img width="33%" src="doc/example-blog-post.jpg">
@@ -59,4 +59,7 @@ The advanced configuration options are explained [here](doc/advanced_configurati
 
 The project started off as a fork of the [Confluence-Mail-to-News-Plugin](https://github.com/stimmt/Confluence-Mail-to-News-Plugin) by Liip AG.
 But the source code has been completely refactored and we added plenty of new features, bugfixes and tests.
-The plugins aren't compatible to another anymore. Therefore we decided to publish this project on its own.
+The plugins are not compatible to another anymore. Therefore we decided to publish this project on its own.
+
+Formerly this plugin was named Mail2Blog, but since version 2.0 this plugin is capable of creating pages and blog posts
+and was renamed to Email to Confluence.

@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>de.dm.mail2blog</groupId>
     <artifactId>mail2blog</artifactId>
-    <version>1.2</version>
+    <version>2.0</version>
     <organization>
         <name>dm-drogerie markt GmbH + Co. KG</name>
         <url>https://www.dm.de/arbeiten-und-lernen/arbeiten-bei-uns/filiadata-c534052.html</url>
@@ -24,9 +24,9 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
-    <name>Mail to Blog Plugin</name>
+    <name>Email to Confluence</name>
     <packaging>atlassian-plugin</packaging>
-    <description>Converts emails to confluence blog posts</description>
+    <description>Converts emails to confluence pages/blog posts</description>
     <repositories>
         <repository>
             <id>maven-atlassian-com</id>

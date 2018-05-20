@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import javax.mail.Message;
 
 /**
- * The job triggered by confluence that polls for new messages and creates blog posts.
+ * The job triggered by confluence that polls for new messages and creates pages/blog posts.
  */
 @Slf4j
 @Component
@@ -23,7 +23,7 @@ public class Mail2BlogJob implements JobRunner
 {
     // Auto wired components.
     @Setter @Autowired          private GlobalState globalState;
-    @Setter @Autowired          private SpaceKeyExtractor spaceKeyExtractor;
+    @Setter @Autowired          private SpaceExtractor spaceExtractor;
 
     /**
      * The main method of this job.
@@ -54,7 +54,7 @@ public class Mail2BlogJob implements JobRunner
 
                 // Process message.
                 MessageTransaction transaction = MessageTransaction.builder()
-                .spaceKeyExtractor(spaceKeyExtractor)
+                .spaceExtractor(spaceExtractor)
                 .mailConfigurationWrapper(mailConfigurationWrapper)
                 .mailbox(mailbox)
                 .message(message)

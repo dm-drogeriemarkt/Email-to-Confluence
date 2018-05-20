@@ -47,7 +47,7 @@ public class Mail2BlogJobTest
 
         transactionTemplate = mock(TransactionTemplate.class);
         doReturn(transactionTemplate).when(mail2BlogJob).getTransactionTemplate();
-        mail2BlogJob.setSpaceKeyExtractor(new SpaceKeyExtractor());
+        mail2BlogJob.setSpaceExtractor(new SpaceExtractor());
 
         globalState = mock(GlobalState.class);
         mail2BlogJob.setGlobalState(globalState);
