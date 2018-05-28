@@ -3,8 +3,8 @@
 <p align="center">
     <img src="doc/mail2blog-logo.jpg" alt="Logo" width="33%">
     <br>
-    <a href="https://travis-ci.org/dm-drogeriemarkt/Mail2Blog"><img src="https://travis-ci.org/dm-drogeriemarkt/Mail2Blog.svg?branch=master" alt="Build Status"></a>
-    <a href="https://codecov.io/gh/dm-drogeriemarkt/Mail2Blog"><img src="https://img.shields.io/codecov/c/github/dm-drogeriemarkt/Mail2Blog.svg" alt="Build Status"></a>
+    <a href="https://travis-ci.org/dm-drogeriemarkt/Email-to-Confluence"><img src="https://travis-ci.org/dm-drogeriemarkt/Email-to-Confluence.svg?branch=master" alt="Build Status"></a>
+    <a href="https://codecov.io/gh/dm-drogeriemarkt/Email-to-Confluence"><img src="https://img.shields.io/codecov/c/github/dm-drogeriemarkt/Email-to-Confluence.svg" alt="Build Status"></a>
 </p>
 
 Send email to Confluence. This add-on converts emails to Confluence pages or blog posts. Store and reference your weekly/daily/monthly newsletters in Confluence.
