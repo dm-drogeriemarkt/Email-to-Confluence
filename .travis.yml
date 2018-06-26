@@ -27,8 +27,8 @@ install:
 
 env:
   - VERSION="5.10.9" # lowest supported version
-  - VERSION="6.6.5"  # latest enterprise release
-  - VERSION="6.9.0"    # latest known version
+  - VERSION="6.6.6"  # latest enterprise release
+  - VERSION="6.10.0"   # latest known version
 
 script:
   - bash integration-test.sh -version $VERSION

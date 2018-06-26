@@ -211,8 +211,8 @@
         </plugins>
     </build>
     <properties>
-        <confluence.version>6.9.0</confluence.version>
-        <confluence.data.version>6.9.0</confluence.data.version>
+        <confluence.version>6.10.0</confluence.version>
+        <confluence.data.version>6.10.0</confluence.data.version>
         <amps.version>6.3.15</amps.version>
         <plugin.testrunner.version>1.2.3</plugin.testrunner.version>
         <atlassian.spring.scanner.version>2.0.1</atlassian.spring.scanner.version>
