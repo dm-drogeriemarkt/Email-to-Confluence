@@ -14,7 +14,7 @@ deploy:
   file_glob: true
   file: target/mail2blog-*.jar
   on:
-    repo: dm-drogeriemarkt/Mail2Blog
+    repo: dm-drogeriemarkt/Email-to-Confluence
     tags: true
 
 install:
