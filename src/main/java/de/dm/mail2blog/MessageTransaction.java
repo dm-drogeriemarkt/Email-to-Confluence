@@ -32,7 +32,7 @@ public class MessageTransaction implements TransactionCallback<Void> {
             List<SpaceInfo> spaceInfos = spaceExtractor.getSpaces(mailConfigurationWrapper, message);
 
             if (spaceInfos.isEmpty()) {
-                log.error("Mail2Blog: Failed to process message. Failed to get a valid space.");
+                log.error("Mail2Blog: failed to process message. Failed to get a valid space.");
                 status = false;
             } else {
                 for (SpaceInfo spaceInfo : spaceInfos) {
@@ -43,7 +43,7 @@ public class MessageTransaction implements TransactionCallback<Void> {
             }
         } catch (Exception e) {
             status = false;
-            log.error("Mail2Blog: Failed to process message", e);
+            log.error("Mail2Blog: failed to process message", e);
         }
 
         try {
@@ -53,7 +53,7 @@ public class MessageTransaction implements TransactionCallback<Void> {
                 mailbox.flagAsInvalid(message);
             }
         } catch (Exception e) {
-            log.error("Mail2Blog: Failed to flag message", e);
+            log.error("Mail2Blog: failed to flag message", e);
         }
 
         return null;

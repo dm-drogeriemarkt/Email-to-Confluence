@@ -115,7 +115,7 @@ public class MessageToContentProcessor {
                     }
                 }
             } catch (Exception e) {
-                log.debug("Mail2Blog: Failed to save attachment: " + e.getMessage(), e);
+                log.debug("Mail2Blog: failed to save attachment", e);
             }
 
             // Fix cid links to attachments.
@@ -172,7 +172,7 @@ public class MessageToContentProcessor {
                 content += "</ul>";
             }
 
-            log.debug("Mail2Blog: Page/Blog entry content converted:\n" + content);
+            log.debug("Mail2Blog: page/blog entry content converted:\n" + content);
 
             // Set content.
             page.setBodyAsString(content);
@@ -198,20 +198,20 @@ private void checkSender(User sender)
                 && !mailConfigurationWrapper.getMailConfiguration().getSecurityGroup().isEmpty()
             ) {
                 if (sender == null) {
-                    throw new MessageToContentProcessorException("Could not find a confluence user for sender address.");
+                    throw new MessageToContentProcessorException("could not find a confluence user for sender address");
                 }
 
                 Group group = getGroupManager().getGroup(mailConfigurationWrapper.getMailConfiguration().getSecurityGroup());
                 if (group == null) {
-                    throw new MessageToContentProcessorException("Invalid group in settings.");
+                    throw new MessageToContentProcessorException("invalid group in settings");
                 }
 
                 if (!getGroupManager().hasMembership(group, sender)) {
-                    throw new MessageToContentProcessorException("Sender mail lacks permissions to create pages/blog posts.");
+                    throw new MessageToContentProcessorException("sender mail lacks permissions to create pages/blog posts");
                 }
             }
         } catch (EntityException e) {
-            throw new MessageToContentProcessorException("Failed to check the group membership of the sender.", e);
+            throw new MessageToContentProcessorException("failed to check the group membership of the sender", e);
         }
     }
 
@@ -230,7 +230,7 @@ private void checkSender(User sender)
         try {
             title = message.getSubject();
         } catch (MessagingException me) {
-            log.warn("Could not get subject from message.");
+            log.warn("could not get subject from message");
             title = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(Calendar.getInstance().getTime());
         }
 
@@ -270,7 +270,7 @@ private void checkSender(User sender)
 
             // If something goes terribly wrong.
             if (i > 4) {
-                throw new MessageToContentProcessorException("Failed to generate a unique title for this page/blog post. Aborting.");
+                throw new MessageToContentProcessorException("failed to generate a unique title for this page/blog post, aborting");
             }
 
             i++;

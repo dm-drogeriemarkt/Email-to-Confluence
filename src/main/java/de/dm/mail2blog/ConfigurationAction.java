@@ -71,56 +71,56 @@ public class ConfigurationAction extends ConfluenceActionSupport {
             try {
                 InetAddress.getByName(getMailConfiguration().getServer());
             } catch (UnknownHostException e) {
-                addFieldError("mailConfiguration.server","Please enter a valid hostname/ip");
-                addActionError("Please enter a valid hostname/ip as mail server");
+                addFieldError("mailConfiguration.server","please enter a valid hostname/ip");
+                addActionError("please enter a valid hostname/ip as mail server");
             }
         }
 
         // Check that a username is given.
         if (getMailConfiguration().getUsername().isEmpty()) {
-            addFieldError("mailConfiguration.username", "Please enter a value");
-            addActionError("Please enter a user name");
+            addFieldError("mailConfiguration.username", "please enter a value");
+            addActionError("please enter a user name");
         }
 
         // Check that emailaddress is given.
         if (getMailConfiguration().getEmailaddress().isEmpty()) {
-            addFieldError("mailConfiguration.emailaddress", "Please enter a value");
-            addActionError("Please enter a mail address");
+            addFieldError("mailConfiguration.emailaddress", "please enter a value");
+            addActionError("please enter a mail address");
         }
 
         // Validate protocol.
         if (!getProtocols().containsKey(getMailConfiguration().getProtocol())) {
-            addFieldError("mailConfiguration.protocol", "Please choose a valid value");
-            addActionError("Please choose a valid protocol");
+            addFieldError("mailConfiguration.protocol", "please choose a valid value");
+            addActionError("please choose a valid protocol");
         }
 
         // Validate port.
         if (getMailConfiguration().getPort() < 0 || getMailConfiguration().getPort() > 0xFFFF) {
-            addFieldError("mailConfiguration.port", "Please enter a value between 0 and 65535");
-            addActionError("Please enter a port number between 0 and 65535");
+            addFieldError("mailConfiguration.port", "please enter a value between 0 and 65535");
+            addActionError("please enter a port number between 0 and 65535");
         }
 
         // Validate default space.
         if (spaceManager.getSpace(getMailConfiguration().getDefaultSpace()) == null) {
-            addFieldError("mailConfiguration.defaultSpace", "Please choose a valid value");
-            addActionError("Please choose a valid default space");
+            addFieldError("mailConfiguration.defaultSpace", "please choose a valid value");
+            addActionError("please choose a valid default space");
         }
 
         // Validate default content type.
         if (!ContentTypes.validate(getMailConfiguration().getDefaultContentType())) {
-            addFieldError("mailConfiguration.defaultContentType", "Please choose a valid value");
-            addActionError("Please choose a valid default content type");
+            addFieldError("mailConfiguration.defaultContentType", "please choose a valid value");
+            addActionError("please choose a valid default content type");
         }
 
         // Validate attachment limits.
         if (getMailConfiguration().getMaxAllowedAttachmentSize() > 2048 || getMailConfiguration().getMaxAllowedAttachmentSize() < 1) {
-            addFieldError("mailConfiguration.maxAllowedAttachmentSize", "Please enter a value between 0 and 2048MB");
-            addActionError("Please choose a maximum attachment size between 0 and 2048MB");
+            addFieldError("mailConfiguration.maxAllowedAttachmentSize", "please enter a value between 0 and 2048MB");
+            addActionError("please choose a maximum attachment size between 0 and 2048MB");
         }
 
         if (getMailConfiguration().getMaxAllowedNumberOfAttachments() < -1) {
-            addFieldError("mailConfiguration.maxAllowedNumberOfAttachments", "Please enter a value larger than -1");
-            addActionError("Please set the maximum number of attachments to at least -1");
+            addFieldError("mailConfiguration.maxAllowedNumberOfAttachments", "please enter a value larger than -1");
+            addActionError("please set the maximum number of attachments to at least -1");
         }
 
         // Create space rules and validate them.
@@ -133,8 +133,8 @@ public class ConfigurationAction extends ConfluenceActionSupport {
             || (spaceRuleFields.length != spaceRuleActions.length)
             || (spaceRuleFields.length != spaceRuleContentTypes.length)
         ) {
-            addActionError("Invalid space rules");
-            addFieldError("mailConfiguration.spaceRules", "Invalid space rules");
+            addActionError("invalid space rules");
+            addFieldError("mailConfiguration.spaceRules", "invalid space rules");
         } else {
             for (int i = 0; i < spaceRuleFields.length; i++) {
                 String field = spaceRuleFields[i];
@@ -157,8 +157,8 @@ public class ConfigurationAction extends ConfluenceActionSupport {
                 try {
                     spaceRule.validate(spaceManager);
                 } catch (SpaceRuleValidationException e) {
-                    addActionError("Space rule " + (i+1) + ": " + e.getMessage());
-                    addFieldError("mailConfiguration.spaceRules", "Rule " + (i+1) + ": " + e.getMessage());
+                    addActionError("space rule " + (i+1) + ": " + e.toString());
+                    addFieldError("mailConfiguration.spaceRules", "rule " + (i+1) + ": " + e.toString());
                 }
 
                 spaceRules[i] = spaceRule;
@@ -178,8 +178,8 @@ public class ConfigurationAction extends ConfluenceActionSupport {
         try {
             FileTypeBucket.fromString(getMailConfiguration().getAllowedFileTypes());
         } catch (FileTypeBucketException e) {
-            addFieldError("mailConfiguration.allowedFileTypes", e.getMessage());
-            addActionError("Please fix the errors in the allowed file types text area");
+            addFieldError("mailConfiguration.allowedFileTypes", e.toString());
+            addActionError("please fix the errors in the allowed file types text area");
         }
 
         // Check that the group if given is valid.
@@ -188,11 +188,11 @@ public class ConfigurationAction extends ConfluenceActionSupport {
                 !getMailConfiguration().getSecurityGroup().isEmpty()
                 && groupManager.getGroup(getMailConfiguration().getSecurityGroup()) == null
             ) {
-                addFieldError("mailConfiguration.securityGroup", "Please choose a valid value");
-                addActionError("Please choose a valid group");
+                addFieldError("mailConfiguration.securityGroup", "please choose a valid value");
+                addActionError("please choose a valid group");
             }
         } catch (EntityException e) {
-            log.error("Mail2Blog: Failed to check group", e);
+            log.error("Mail2Blog: failed to check group", e);
         }
 
         // Test the mailbox configuration by trying to connect to the mailbox.
@@ -200,7 +200,12 @@ public class ConfigurationAction extends ConfluenceActionSupport {
             Mailbox mailbox = new Mailbox(configurationActionState.getMailConfigurationWrapper());
             mailbox.getCount();
         } catch (Exception e) {
-            addActionError("Failed to connect to mailbox: " + e.getMessage());
+            String msg = "failed to connect to mailbox: " + e.toString();
+            Throwable cause = e.getCause();
+            if (cause != null) {
+                msg += ", cause: " + cause.toString();
+            }
+            addActionError(msg);
         }
     }
 
@@ -212,11 +217,11 @@ public class ConfigurationAction extends ConfluenceActionSupport {
             // Save the configuration and update the global state.
             mailConfigurationManager.saveConfig(getMailConfiguration());
             globalState.setMailConfigurationWrapper(configurationActionState.getMailConfigurationWrapper().duplicate());
-            addActionMessage("Configuration successfully saved");
+            addActionMessage("configuration successfully saved");
             return ConfluenceActionSupport.SUCCESS;
         } catch (MailConfigurationManagerException e) {
-            addActionError("Failed to save configuration");
-            log.error("Mail2Blog: Failed to save configuration", e);
+            addActionError("failed to save configuration");
+            log.error("Mail2Blog: failed to save configuration", e);
             return ConfluenceActionSupport.ERROR;
         }
     }

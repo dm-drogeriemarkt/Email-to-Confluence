@@ -30,7 +30,7 @@ public class Mail2BlogJob implements JobRunner
      * Called by confluence every time the mail2blog trigger fires.
      */
     public JobRunnerResponse runJob(JobRunnerRequest jobRunnerRequest) {
-        log.info("Mail2Blog: Executing job");
+        log.info("Mail2Blog: executing job");
 
         if ("true".equals(systemGetProperty("atlassian.mail.fetchdisabled"))) {
             return JobRunnerResponse.aborted("Aborting because of atlassian.mail.fetchdisabled=true.");
@@ -61,8 +61,8 @@ public class Mail2BlogJob implements JobRunner
                 .build();
                 getTransactionTemplate().execute(transaction);
             }
-        } catch (Exception e) {
-            log.error("Mail2Blog: " + e.getMessage(), e);
+        } catch (Throwable e) {
+            log.error("Mail2Blog: " + e.toString(), e);
             return JobRunnerResponse.failed(e);
         }
 

@@ -28,14 +28,14 @@ public class ImapMailboxFlagStrategy implements IMailboxFlagFeature
         try {
             folder = mailbox.getInbox().getFolder(name);
         } catch (MessagingException me) {
-            throw new MailboxException("Failed to get folder " + name + ": " + me.getMessage());
+            throw new MailboxException("failed to get folder '" + name + "'", me);
         }
 
         boolean folder_exists = false;
         try {
             folder_exists = folder.exists();
         } catch (MessagingException me) {
-            throw new MailboxException("Failed to check if folder " + name + " exists: " + me.getMessage(), me);
+            throw new MailboxException("failed to check if folder '" + name + "' exists", me);
 
         }
 
@@ -43,10 +43,10 @@ public class ImapMailboxFlagStrategy implements IMailboxFlagFeature
         if (!folder_exists) {
             try {
                 if (!folder.create(Folder.HOLDS_MESSAGES)) {
-                    throw new MailboxException("Failed to create " + name + " folder.");
+                    throw new MailboxException("failed to create '" + name + "' folder");
                 }
             } catch (MessagingException me) {
-                throw new MailboxException("Failed to create " + name + " folder: " + me.getMessage(), me);
+                throw new MailboxException("failed to create '" + name + "' folder", me);
             }
         }
 
@@ -55,9 +55,9 @@ public class ImapMailboxFlagStrategy implements IMailboxFlagFeature
             folder.open(Folder.READ_WRITE);
         } catch (FolderNotFoundException fnfe)
         {
-            throw new MailboxException("Could not find folder " + name + ": " + fnfe.getMessage(), fnfe);
+            throw new MailboxException("could not find folder '" + name + "'", fnfe);
         } catch (MessagingException e) {
-            throw new MailboxException("Could not open folder " + name + ": " + e.getMessage(), e);
+            throw new MailboxException("could not open folder '" + name + "'", e);
         }
 
         return folder;
@@ -81,7 +81,7 @@ public class ImapMailboxFlagStrategy implements IMailboxFlagFeature
         }
         catch (MessagingException e)
         {
-            throw new MailboxException("Failed to move message: " + e.getMessage());
+            throw new MailboxException("failed to move message", e);
         }
     }
 
@@ -96,7 +96,7 @@ public class ImapMailboxFlagStrategy implements IMailboxFlagFeature
         try {
             to.close(true);
         } catch (MessagingException me) {
-            throw new MailboxException("Failed to close folder: " + me.getMessage());
+            throw new MailboxException("failed to close folder", me);
         }
     }
 
@@ -111,7 +111,7 @@ public class ImapMailboxFlagStrategy implements IMailboxFlagFeature
         try {
             to.close(true);
         } catch (MessagingException me) {
-            throw new MailboxException("Failed to close folder: " + me.getMessage());
+            throw new MailboxException("failed to close folder", me);
         }
     }
 }

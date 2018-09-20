@@ -65,7 +65,7 @@ public class FileTypeBucket {
                 extensions.add(extension);
                 storage.put(mimeType, extensions);
             } else {
-                throw new FileTypeBucketException("Syntax error in line " + line_nr + " near \"" + line + "\"");
+                throw new FileTypeBucketException("syntax error in line " + line_nr + " near \"" + line + "\"");
             }
 
             line_nr++;

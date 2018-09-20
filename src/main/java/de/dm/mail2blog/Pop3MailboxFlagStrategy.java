@@ -21,7 +21,7 @@ public class Pop3MailboxFlagStrategy implements IMailboxFlagFeature {
         try {
             message.setFlag(Flags.Flag.DELETED, true);
         } catch (MessagingException e) {
-            throw new MailboxException("Failed to mark message to be deleted: " + e.getMessage());
+            throw new MailboxException("failed to mark message to be deleted", e);
         }
     }
 

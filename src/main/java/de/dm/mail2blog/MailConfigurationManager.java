@@ -34,11 +34,11 @@ public class MailConfigurationManager {
                 Map<String, Object> map = (Map) object;
                 mailConfiguration = (MailConfiguration) objectMapper.convertValue(map, MailConfiguration.class);
             } else if (object != null) {
-                log.error("Mail2Blog: Failed to load config. Invalid type returned.");
+                log.error("Mail2Blog: failed to load config, invalid type returned");
             }
         } catch (Exception e) {
             mailConfiguration = null;
-            log.error("Mail2Blog: Failed to load config.", e);
+            log.error("Mail2Blog: failed to load config", e);
         }
 
         if (mailConfiguration == null) {
@@ -61,12 +61,12 @@ public class MailConfigurationManager {
             Map<String, Object> map = objectMapper.convertValue(mailConfiguration, Map.class);
             getBandanaManager().setValue(ctx, PLUGIN_KEY, map);
         } catch (Exception e) {
-            throw new MailConfigurationManagerException("Failed to save configuration", e);
+            throw new MailConfigurationManagerException("failed to save configuration", e);
         }
 
         // Read back the configuration from storage and make sure that it equals the given config.
         if (!mailConfiguration.equals(loadConfig())) {
-            throw new MailConfigurationManagerException("Failed to save configuration.");
+            throw new MailConfigurationManagerException("failed to save configuration");
         }
 
     }

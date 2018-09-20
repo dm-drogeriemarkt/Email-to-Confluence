@@ -156,7 +156,7 @@ public class MessageParser {
                 result.add(extractPart(part));
             }
         }  catch (Exception e) {
-            log.debug("Mail2Blog: Failed to process part of message", e);
+            log.debug("Mail2Blog: failed to process part of message", e);
         }
 
         return result;
@@ -223,7 +223,7 @@ public class MessageParser {
         String mimeType = part.getContentType();
 
         if (mimeType == null) {
-            throw new Exception("Failed to get the contentType from the mail.");
+            throw new Exception("failed to get the contentType from the mail");
         }
 
         mimeType = mimeType.toLowerCase();
@@ -273,14 +273,14 @@ public class MessageParser {
 
         int maxattachments = mailConfigurationWrapper.getMailConfiguration().getMaxAllowedNumberOfAttachments();
         if (maxattachments >= 0 && attachmentCounter >= maxattachments) {
-            throw new Exception("Maximum number of attachments exceeded.");
+            throw new Exception("maximum number of attachments exceeded");
         }
 
         // Get the filename.
         String filename = part.getFileName();
 
         if (filename == null) {
-            log.debug("Mail2Blog: Attachment with no filename. Generating one.");
+            log.debug("Mail2Blog: attachment with no filename, generating one");
             filename = UUID.randomUUID().toString();
         }
 
@@ -289,7 +289,7 @@ public class MessageParser {
 
         // Check that the mime type of the extension is allowed.
         if (!mailConfigurationWrapper.getFileTypeBucket().checkMimeType(mimeType)) {
-            throw new Exception("ContentType forbidden.");
+            throw new Exception("contentType forbidden");
         }
 
         // Read input stream into a byte array.
@@ -309,7 +309,7 @@ public class MessageParser {
 
             do {
                 if (filesize > maxsize) {
-                    throw new Exception("Attachment larger than allowed.");
+                    throw new Exception("attachment larger than allowed");
                 }
 
                 byte[] buffer = new byte[1024];

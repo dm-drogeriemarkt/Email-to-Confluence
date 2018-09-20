@@ -41,7 +41,7 @@ public class Mailbox implements IMailboxFlagFeature {
         } else if (mailConfigurationWrapper.getMailConfiguration().getProtocol().endsWith("imap")) {
             this.flagStrategy = new ImapMailboxFlagStrategy(this);
         } else {
-            throw new MailboxException("Unsupported protocol " + mailConfigurationWrapper.getMailConfiguration().getProtocol() + ".");
+            throw new MailboxException("unsupported protocol " + mailConfigurationWrapper.getMailConfiguration().getProtocol());
         }
 
         // Connect to mailbox.
@@ -59,7 +59,7 @@ public class Mailbox implements IMailboxFlagFeature {
             || StringUtils.isBlank(mailConfigurationWrapper.getMailConfiguration().getUsername())
             || mailConfigurationWrapper.getMailConfiguration().getPassword() == null
         ) {
-            throw new MailboxException("Incomplete mail configuration settings (at least one setting is null/empty).");
+            throw new MailboxException("incomplete mail configuration settings (at least one setting is null/empty)");
         }
 
         // Create the properties for the session.
@@ -104,7 +104,7 @@ public class Mailbox implements IMailboxFlagFeature {
         try {
             store = session.getStore(protocol);
         } catch (NoSuchProviderException e) {
-            throw new MailboxException("No javax.mail provider for protocol " + protocol + ". Please change the protocol.", e);
+            throw new MailboxException("no javax.mail provider for protocol " + protocol + ", please change the protocol", e);
         }
 
         // Connect to the mailstore.
@@ -117,19 +117,19 @@ public class Mailbox implements IMailboxFlagFeature {
         }
         catch (AuthenticationFailedException afe)
         {
-            throw new MailboxException("Authentication for mail store failed: " + afe.getMessage(), afe);
+            throw new MailboxException("authentication for mail store failed", afe);
         }
         catch (MessagingException me)
         {
-            throw new MailboxException("Connecting to mail store failed: " + me.getMessage(), me);
+            throw new MailboxException("connecting to mail store failed", me);
         }
         catch (IllegalStateException ise)
         {
-            throw new MailboxException("Connecting to mail store failed, already connected: " + ise.getMessage(), ise);
+            throw new MailboxException("connecting to mail store failed", ise);
         }
         catch (Exception e)
         {
-            throw new MailboxException("Connecting to mail store failed, general exception: " + e.getMessage(), e);
+            throw new MailboxException("connecting to mail store failed", e);
         }
     }
 
@@ -146,9 +146,9 @@ public class Mailbox implements IMailboxFlagFeature {
                 // because we want to move/delete messages we already handled.
                 inbox.open(Folder.READ_WRITE);
             } catch (FolderNotFoundException fnfe) {
-                throw new MailboxException("Could not find INBOX folder: " + fnfe.getMessage(), fnfe);
+                throw new MailboxException("could not find INBOX folder", fnfe);
             } catch (MessagingException e) {
-                throw new MailboxException("Could not open INBOX folder: " + e.getMessage(), e);
+                throw new MailboxException("could not open INBOX folder", e);
             }
         }
 
@@ -162,7 +162,7 @@ public class Mailbox implements IMailboxFlagFeature {
         try {
             return getInbox().getMessages();
         } catch (MessagingException e) {
-            throw  new MailboxException("Could not fetch messages from inbox: " + e.getMessage(), e);
+            throw  new MailboxException("could not fetch messages from inbox", e);
         }
     }
 
@@ -170,7 +170,7 @@ public class Mailbox implements IMailboxFlagFeature {
         try {
             return getInbox().getMessageCount();
         } catch (MessagingException e) {
-            throw  new MailboxException("Failed to count messages in inbox: " + e.getMessage(), e);
+            throw  new MailboxException("failed to count messages in inbox", e);
         }
     }
 
@@ -182,14 +182,14 @@ public class Mailbox implements IMailboxFlagFeature {
             try {
                 inbox.close(true);
             } catch (MessagingException e) {
-                throw new MailboxException("Failed to close INBOX: " + e.getMessage(), e);
+                throw new MailboxException("failed to close INBOX", e);
             }
         }
 
         try {
             store.close();
         } catch (MessagingException e) {
-            throw new MailboxException("Failed to close mail store: " + e.getMessage(), e);
+            throw new MailboxException("failed to close mail store", e);
         }
     }
 

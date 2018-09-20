@@ -48,7 +48,7 @@ public class SpaceExtractor {
                             // Get space
                             Space space = getSpaceManager().getSpace(spaceKey);
                             if (space == null) {
-                                log.warn("Mai2Blog: Invalid SpaceKey " + spaceKey);
+                                log.warn("Mai2Blog: invalid space key " + spaceKey);
                                 continue;
                             }
 
@@ -64,11 +64,7 @@ public class SpaceExtractor {
                     info = " for SpaceRule" + info;
                 } catch (Exception e2) {}
 
-                if (e instanceof MessagingException) {
-                    log.warn("Mail2Blog: MessagingException(" + e.getMessage() + ")" + info);
-                } else {
-                    log.warn("Mail2Blog: Exception(" + e.getMessage() + ")" + info);
-                }
+                log.warn("Mail2Blog: (" + e.toString() + ")" + info, e);
             }
 
             // A move rule is always the finial rule that gets applied.
@@ -99,32 +95,38 @@ public class SpaceExtractor {
         ArrayList<String> values = new ArrayList<String>();
 
         if (SpaceRuleFields.FROM.equals(rule.getField())) {
-            Address[] to = message.getFrom();
-            for (Address a: to) {
-                String emailAddress = (a instanceof InternetAddress)
-                        ? ((InternetAddress) a).getAddress()
-                        : a.toString();
-                values.add(emailAddress.trim());
+            Address[] from = message.getFrom();
+            if (from != null) {
+                for (Address a : from) {
+                    String emailAddress = (a instanceof InternetAddress)
+                            ? ((InternetAddress) a).getAddress()
+                            : a.toString();
+                    values.add(emailAddress.trim());
+                }
             }
         }
 
         if (SpaceRuleFields.TO.equals(rule.getField()) || SpaceRuleFields.ToCC.equals(rule.getField())) {
             Address[] to = message.getRecipients(Message.RecipientType.TO);
-            for (Address a: to) {
-                String emailAddress = (a instanceof InternetAddress)
-                        ? ((InternetAddress) a).getAddress()
-                        : a.toString();
-                values.add(emailAddress.trim());
+            if (to != null) {
+                for (Address a : to) {
+                    String emailAddress = (a instanceof InternetAddress)
+                            ? ((InternetAddress) a).getAddress()
+                            : a.toString();
+                    values.add(emailAddress.trim());
+                }
             }
         }
 
         if (SpaceRuleFields.CC.equals(rule.getField()) || SpaceRuleFields.ToCC.equals(rule.getField())) {
             Address[] cc = message.getRecipients(Message.RecipientType.CC);
-            for (Address a: cc) {
-                String emailAddress = (a instanceof InternetAddress)
-                        ? ((InternetAddress) a).getAddress()
-                        : a.toString();
-                values.add(emailAddress.trim());
+            if (cc != null) {
+                for (Address a : cc) {
+                    String emailAddress = (a instanceof InternetAddress)
+                            ? ((InternetAddress) a).getAddress()
+                            : a.toString();
+                    values.add(emailAddress.trim());
+                }
             }
         }
 
