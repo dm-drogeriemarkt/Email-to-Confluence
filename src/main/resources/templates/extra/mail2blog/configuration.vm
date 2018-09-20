@@ -864,6 +864,24 @@ $webResourceManager.requireResource("com.atlassian.auiplugin:aui-select2")
                                     </div>
                                 </fieldset>
                             </div>
+                            <div style="margin: 10px 0 0 0;">
+                                <fieldset class="group">
+                                    <legend><span>TLS/SSL versions</span></legend>
+                                    <input
+                                        class="text"
+                                        type="text"
+                                        id="mailConfiguration.sslVersions"
+                                        name="mailConfiguration.sslVersions"
+                                        value="${mailConfiguration.sslVersions}"
+                                    >
+                                    <div class="description">
+                                        If left empty the defaults from the javax.mail package are used.<br>
+                                        Specifies the SSL protocols that will be enabled for SSL connections.
+                                        The property value is a whitespace separated list of tokens acceptable to the
+                                        <a href="https://docs.oracle.com/javase/7/docs/api/javax/net/ssl/SSLSocket.html#setEnabledProtocols%28java.lang.String%5B%5D%29">javax.net.ssl.SSLSocket.setEnabledProtocols</a> method.
+                                    </div>
+                                </fieldset>
+                            </div>
                         </div>
                     </div>
 

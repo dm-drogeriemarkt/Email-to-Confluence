@@ -94,6 +94,10 @@ public class Mailbox implements IMailboxFlagFeature {
             prop.setProperty(propertyPrefix + ".ssl.checkserveridentity", "false");
         }
 
+        if (!StringUtils.isBlank(mailConfigurationWrapper.getMailConfiguration().getSslVersions())) {
+            prop.setProperty(propertyPrefix + ".ssl.protocols", mailConfigurationWrapper.getMailConfiguration().getSslVersions());
+        }
+
         // Set connection timeout (10 seconds).
         prop.setProperty(propertyPrefix + ".connectiontimeout", "10000");
 

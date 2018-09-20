@@ -28,6 +28,7 @@ public class MailConfiguration {
     @NonNull private String password;
     @NonNull private boolean secure; // Use IMAPs or POP3s
     @NonNull private boolean checkCertificates; // Check SSL certificates
+    @NonNull private String sslVersions; // force SSL/TLS version to use
     @NonNull private String defaultSpace;
     @NonNull private String defaultContentType;
 
@@ -90,6 +91,7 @@ public class MailConfiguration {
         private int port = 993;
         private boolean secure = true;
         private boolean checkCertificates = true;
+        private String sslVersions = "";
         private String emailaddress = "";
         private String username = "";
         private String password = "";
