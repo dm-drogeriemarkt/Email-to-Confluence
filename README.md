@@ -44,7 +44,7 @@ From now on **every 5 minutes** Confluence will pull messages from your **INBOX*
 and post them as blog posts into the default space.
 
 The configuration is explained on the configuration page.
-The advanced configuration options are explained [here](doc/advanced_configuration.md).
+The advanced configuration options are explained [here](doc/formatting.md).
 
 ## Further Information
 - [Formatting](doc/formatting.md)
