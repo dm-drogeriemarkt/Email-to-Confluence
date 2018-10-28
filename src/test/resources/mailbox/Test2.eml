@@ -1,0 +1,50 @@
+From: "Alice" <alice@example.org>
+To: "Bob" <bob@example.org>
+Subject: Test
+Date: Mon, 13 Mar 2017 09:54:39 +0000
+Content-Type: text/html; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+<p>Lieber Bob,</p>
+
+<p>
+herzlich willkommen beim dm-Newsletter! <strong>Neuerscheinungen, Produkttests, exklusive Gewinnspiele, Beratung</strong> und vieles mehr – jetzt bekommen Sie alle Infos von dm direkt in Ihr Postfach.
+</p>
+
+<p>
+Mit Ihrer Anmeldung haben Sie automatisch an unserem Gewinnspiel teilgenommen, bei dem wir monatlich 50 dm-Produktboxen verlosen. Die Gewinner werden zufällig und innerhalb von vier Wochen nach Ende des jeweiligen Monats ausgelost und per Post benachrichtigt. Viel Glück!
+</p>
+
+<p>
+<ul>
+    <li>ALANA</li>
+    <li>alverde</li>
+    <li>babylove</li>
+    <li>Balea</li>
+</ul>
+</p>
+
+<p>
+<table border="1">
+    <thead>
+        <tr>
+            <th>Produkt</th>
+            <th>Marke</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Servietten</td>
+            <td>Profissimo</td>
+        </tr>
+        <tr>
+            <td>WC-Papiersitze</td>
+            <td>Sanft&amp;Sicher</td>
+        </tr>
+    </tbody>
+</table>
+</p>
+
+<p>Mit freundlichen Grüßen</p>
+
+<p>dm-drogerie markt</p>

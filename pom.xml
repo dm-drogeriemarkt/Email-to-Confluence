@@ -36,6 +36,20 @@
     </repositories>
     <dependencies>
         <dependency>
+            <groupId>com.icegreen</groupId>
+            <artifactId>greenmail</artifactId>
+            <!-- We need to use snapshot version because of issues with mulipart emails & imap in 1.5.x. -->
+            <!-- For example https://github.com/greenmail-mail-test/greenmail/issues/172 -->
+            <version>1.5.4</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.sun.mail</groupId>
+                    <artifactId>javax.mail</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.12</version>

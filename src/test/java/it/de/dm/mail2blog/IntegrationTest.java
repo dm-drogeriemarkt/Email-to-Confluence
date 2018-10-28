@@ -6,17 +6,30 @@ import com.atlassian.confluence.spaces.Space;
 import com.atlassian.user.User;
 import com.atlassian.user.impl.DefaultUser;
 import com.atlassian.user.security.password.Credential;
-import de.dm.mail2blog.*;
-import de.saly.javamail.mock2.MailboxFolder;
-import de.saly.javamail.mock2.MockMailbox;
+import com.icegreen.greenmail.user.GreenMailUser;
+import com.icegreen.greenmail.util.GreenMail;
+import com.icegreen.greenmail.util.ServerSetup;
+import com.sun.mail.imap.IMAPStore;
+import de.dm.mail2blog.ContentTypes;
+import de.dm.mail2blog.MailConfiguration;
+import de.dm.mail2blog.SpaceRule;
+import de.dm.mail2blog.SpaceRuleActions;
+import de.dm.mail2blog.SpaceRuleFields;
+import de.dm.mail2blog.SpaceRuleOperators;
+import de.dm.mail2blog.StaticAccessor;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.mail.internet.MimeMessage;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.*;
+import static com.icegreen.greenmail.util.ServerSetupTest.IMAPS;
+import static com.icegreen.greenmail.util.ServerSetupTest.POP3;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Create a mailbox with messages and trigger the Mail2Blog job.
@@ -30,24 +43,24 @@ public class IntegrationTest
     MailConfiguration mailConfiguration;
     User user;
     HashMap<String, Space> spaces = new HashMap<String, Space>();;
-    MockMailbox mockMailbox;
+    GreenMail greenMail;
 
     private static final int MESSAGE_COUNT = 2;
     private static final String SPACE_KEY_A = "testMail2blog";
     private static final String SPACE_KEY_B = "testMail2blog2";
     private static final String USERNAME = "testMail2blog";
     private static final String EMAIL = "bob@example.org";
+    private static final String PASSWORD = "password";
 
     /**
      * Generate the mail configuration.
      */
     private void setUpConfiguration() throws Exception {
         mailConfiguration = MailConfiguration.builder()
-        .server("mail.example.org")
+        .server("127.0.0.1")
         .secure(false)
-        .username(EMAIL)
-        .password("password")
-        .protocol("mock_imap")
+        .username(USERNAME)
+        .password(PASSWORD)
         .emailaddress(EMAIL)
         .defaultSpace(SPACE_KEY_A)
         .defaultContentType(ContentTypes.BlogPost)
@@ -68,26 +81,31 @@ public class IntegrationTest
      * Create a mail server with messages.
      */
     private void setUpMailbox() throws Exception {
-        tearDownMailbox();
+        greenMail = new GreenMail(new ServerSetup[]{POP3, IMAPS});
+        greenMail.start();
 
-        mockMailbox = MockMailbox.get(EMAIL);
-        MailboxFolder remoteInbox = mockMailbox.getInbox();
+        GreenMailUser user = greenMail.setUser(EMAIL, USERNAME, PASSWORD);
 
         // Load all messages from resources/mailbox into the INBOX.
         InputStream is1 = IntegrationTest.class.getClassLoader().getResourceAsStream("mailbox/Hello.eml");
         MimeMessage message1 = new MimeMessage(null, is1);
-        remoteInbox.add(message1);
+        user.deliver(message1);
 
-        InputStream is2 = IntegrationTest.class.getClassLoader().getResourceAsStream("mailbox/Test.eml");
+        // Unfortunately greenmail can't handle multipart mime-mails properly (yet?).
+        // This is why we use Test2.eml instead of Test.eml.
+        InputStream is2 = IntegrationTest.class.getClassLoader().getResourceAsStream("mailbox/Test2.eml");
         MimeMessage message2 = new MimeMessage(null, is2);
-        remoteInbox.add(message2);
+        user.deliver(message2);
     }
 
     /**
      * Destroy test mailbox.
      */
     private void tearDownMailbox() throws Exception {
-        MockMailbox.resetAll();
+        if (greenMail != null) {
+            greenMail.stop();
+            greenMail = null;
+        }
     }
 
     /**
@@ -95,7 +113,6 @@ public class IntegrationTest
      */
     private void setUpUser() throws Exception {
         user = StaticAccessor.getUserAccessor().getUser(USERNAME);
-        tearDownUser();
         if (user == null) {
             user = StaticAccessor.getUserAccessor().createUser(
                     new DefaultUser(USERNAME, USERNAME, EMAIL),
@@ -119,7 +136,6 @@ public class IntegrationTest
      * Create the test spaces.
      */
     private void setUpSpaces() throws Exception {
-        tearDownSpaces();
         for (String key : (new String[]{SPACE_KEY_A, SPACE_KEY_B})) {
             if (!spaces.containsKey(key)) {
                 Space space = StaticAccessor.getSpaceManager().createSpace(key, key, "Mail2Blog Test Space", user);
@@ -161,11 +177,16 @@ public class IntegrationTest
         assertTrue("Wrong content in page", page1.getBodyAsString().contains("Hello World"));
     }
 
-    public void validateMailbox() throws Exception {
-        assertEquals("Expected an empty mailbox.", 0, mockMailbox.getInbox().getMessageCount());
+    public void validateMailboxImap() throws Exception {
+        IMAPStore imapStore = greenMail.getImaps().createStore();
+        imapStore.connect(USERNAME, PASSWORD);
 
-        MailboxFolder processed = mockMailbox.getInbox().getOrAddSubFolder("Processed");
-        assertEquals("Not all messages ended up in the processed folder.", MESSAGE_COUNT, processed.getMessageCount());
+        assertEquals("Expected an empty mailbox.", 0, imapStore.getFolder("INBOX").getMessageCount());
+        assertEquals("Not all messages ended up in the processed folder.", MESSAGE_COUNT, imapStore.getFolder("INBOX").getFolder("Processed").getMessageCount());
+    }
+
+    public void validateMailboxPop3() throws Exception {
+        assertEquals("Expected an empty mailbox.", 0, greenMail.getReceivedMessages().length);
     }
 
     public void setUp() throws Exception {
@@ -175,18 +196,64 @@ public class IntegrationTest
         setUpSpaces();
     }
 
-    public void testProcess() throws Exception
+    public void tearDown() throws Exception {
+        try {
+            tearDownSpaces();
+        } finally {
+            try {
+                tearDownUser();
+            } finally {
+                tearDownMailbox();
+            }
+        }
+    }
+
+    public void testProcessImaps() throws Exception
     {
-        // Save the configuration
-        StaticAccessor.getMailConfigurationManager().saveConfig(mailConfiguration);
+        try {
+            setUp();
 
-        // Reset global state, so that config gets fetched from disk.
-        StaticAccessor.getGlobalState().setMailConfigurationWrapper(null);
+            // Save the configuration
+            mailConfiguration.setProtocol("imap");
+            mailConfiguration.setSecure(true);
+            mailConfiguration.setPort(3993);
+            mailConfiguration.setCheckCertificates(false);
+            StaticAccessor.getMailConfigurationManager().saveConfig(mailConfiguration);
 
-        // Run job
-        StaticAccessor.getMail2BlogJob().runJob(null);
+            // Reset global state, so that config gets fetched from disk
+            StaticAccessor.getGlobalState().setMailConfigurationWrapper(null);
 
-        validatePosts();
-        validateMailbox();
+            // Sleep 7 minutes, in that time the mail2blog job needs to run
+            TimeUnit.MINUTES.sleep(7);
+
+            validatePosts();
+            validateMailboxImap();
+        } finally {
+            tearDown();
+        }
+    }
+
+    public void testProcessPop3() throws Exception
+    {
+        try {
+            setUp();
+
+            // Save the configuration
+            mailConfiguration.setProtocol("pop3");
+            mailConfiguration.setSecure(false);
+            mailConfiguration.setPort(3110); // greenmail imap test port
+            StaticAccessor.getMailConfigurationManager().saveConfig(mailConfiguration);
+
+            // Reset global state, so that config gets fetched from disk.
+            StaticAccessor.getGlobalState().setMailConfigurationWrapper(null);
+
+            // Sleep 7 minutes, in that time the mail2blog job needs to run
+            TimeUnit.MINUTES.sleep(7);
+
+            validatePosts();
+            validateMailboxPop3();
+        } finally {
+            tearDown();
+        }
     }
 }
