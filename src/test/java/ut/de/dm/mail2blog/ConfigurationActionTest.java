@@ -7,6 +7,8 @@ import com.atlassian.user.Group;
 import com.atlassian.user.GroupManager;
 import com.atlassian.user.search.page.Pager;
 import de.dm.mail2blog.*;
+import de.dm.mail2blog.base.SpaceRule;
+import de.dm.mail2blog.base.SpaceRuleSpaces;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,6 +48,9 @@ public class ConfigurationActionTest
         configurationAction.setGroupManager(groupManager);
         configurationAction.setSpaceManager(spaceManager);
         configurationAction.setCheckboxTracker(checkboxTracker);
+
+        SpaceKeyValidator spaceKeyValidator = new SpaceKeyValidator(spaceManager);
+        configurationAction.setSpaceKeyValidator(spaceKeyValidator);
 
         mailConfiguration = MailConfiguration.builder().build();
         MailConfigurationWrapper wrapper = new MailConfigurationWrapper(mailConfiguration);

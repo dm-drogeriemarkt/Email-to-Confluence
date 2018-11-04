@@ -1,5 +1,7 @@
 package de.dm.mail2blog;
 
+import de.dm.mail2blog.base.*;
+
 import java.util.regex.Pattern;
 
 /**

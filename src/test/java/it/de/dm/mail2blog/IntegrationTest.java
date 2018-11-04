@@ -10,13 +10,9 @@ import com.icegreen.greenmail.user.GreenMailUser;
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.ServerSetup;
 import com.sun.mail.imap.IMAPStore;
-import de.dm.mail2blog.ContentTypes;
 import de.dm.mail2blog.MailConfiguration;
-import de.dm.mail2blog.SpaceRule;
-import de.dm.mail2blog.SpaceRuleActions;
-import de.dm.mail2blog.SpaceRuleFields;
-import de.dm.mail2blog.SpaceRuleOperators;
 import de.dm.mail2blog.StaticAccessor;
+import de.dm.mail2blog.base.*;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.mail.internet.MimeMessage;

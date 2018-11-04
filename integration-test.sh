@@ -172,8 +172,7 @@ echo "[INFO] starting confluence"
 echo "\$ atlas-run -B --server 127.0.0.1 $flags" >>"$confluence_logfile"
 cat /dev/zero > "$confluence_input_pipe" &
 conflunece_input_pid=$!
-#atlas-run -B --server 127.0.0.1 $flags <"$confluence_input_pipe" >>"$confluence_logfile" 2>&1 & 
-atlas-debug -B --server 127.0.0.1 $flags <"$confluence_input_pipe" >>"$confluence_logfile" 2>&1 & 
+atlas-run -B --server 127.0.0.1 $flags <"$confluence_input_pipe" >>"$confluence_logfile" 2>&1 & 
 confluence_pid=$!
 launchtime=$(timestamp)
 

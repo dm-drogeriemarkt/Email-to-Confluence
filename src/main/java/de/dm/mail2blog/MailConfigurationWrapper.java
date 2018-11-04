@@ -1,5 +1,9 @@
 package de.dm.mail2blog;
 
+import com.atlassian.confluence.setup.settings.SettingsManager;
+import de.dm.mail2blog.base.FileTypeBucket;
+import de.dm.mail2blog.base.FileTypeBucketException;
+import de.dm.mail2blog.base.Mail2BlogBaseConfiguration;
 import lombok.Setter;
 
 /**
@@ -58,5 +62,30 @@ public class MailConfigurationWrapper {
     public MailConfiguration getMailConfiguration() {
         UpgradeMailConfiguration.upgradeMailConfiguration(mailConfiguration);
         return mailConfiguration;
+    }
+
+    /**
+     * Create the base configuration used by the dm.de.mail2blog.base library.
+     */
+    public Mail2BlogBaseConfiguration getMail2BlogBaseConfiguration() throws FileTypeBucketException {
+        // Use the smaller limitation of the system global wide max. attachment size
+        // and the one configured in the plugin.
+        long maxattachementsize = Math.min(
+                1024 * 1024 * mailConfiguration.getMaxAllowedAttachmentSize(),
+                getSettingsManager().getGlobalSettings().getAttachmentMaxSize()
+        );
+
+        return Mail2BlogBaseConfiguration.builder()
+            .defaultSpace(mailConfiguration.getDefaultSpace())
+            .spaceRules(mailConfiguration.getSpaceRules())
+            .defaultContentType(mailConfiguration.getDefaultContentType())
+            .preferredContentTypes(mailConfiguration.getPreferredContentTypes())
+            .maxAllowedAttachmentSizeInBytes(maxattachementsize)
+            .fileTypeBucket(getFileTypeBucket())
+        .build();
+    }
+
+    public SettingsManager getSettingsManager() {
+        return StaticAccessor.getSettingsManager();
     }
 }
