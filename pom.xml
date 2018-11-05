@@ -50,6 +50,22 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>de.dm.mail2blog</groupId>
+            <artifactId>base</artifactId>
+            <version>2.1.5</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.sun.mail</groupId>
+                    <artifactId>javax.mail</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.12</version>
@@ -68,25 +84,16 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-nop</artifactId>
-            <version>1.7.25</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.2.2-atlassian-1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.googlecode.owasp-java-html-sanitizer</groupId>
-            <artifactId>owasp-java-html-sanitizer</artifactId>
-            <version>20160924.1</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>2.9.6</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -142,12 +149,27 @@
                     <instructions>
                         <Atlassian-Plugin-Key>${atlassian.plugin.key}</Atlassian-Plugin-Key>
                         <!-- Add package to export here -->
-                        <Export-Package>de.dm.mail2blog, it.de.dm.mail2blog</Export-Package>
+                        <Export-Package>de.dm.mail2blog, it.de.dm.mail2blog, de.dm.mail2blog.base</Export-Package>
                         <!-- Add package import here -->
-                        <Import-Package>org.springframework.osgi.*;resolution:="optional", org.eclipse.gemini.blueprint.*;resolution:="optional",* com.atlassian.sal.api.transaction, com.atlassian.bandana, *</Import-Package>
+                        <Import-Package>org.springframework.osgi.*;resolution:="optional", org.eclipse.gemini.blueprint.*;resolution:="optional", *;resolution:="optional"</Import-Package>
                         <!-- Ensure plugin is spring powered -->
                         <Spring-Context>*</Spring-Context>
                     </instructions>
+
+                    <testBundleExcludes>
+                        <testBundleExclude>
+                            <groupId>de.dm.mail2blog</groupId>
+                            <artifactId>base</artifactId>
+                        </testBundleExclude>
+                        <testBundleExclude>
+                            <groupId>com.fasterxml.jackson.core</groupId>
+                            <artifactId>jackson-databind</artifactId>
+                        </testBundleExclude>
+                        <testBundleExclude>
+                            <groupId>com.google.code.gson</groupId>
+                            <artifactId>gson</artifactId>
+                        </testBundleExclude>
+                    </testBundleExcludes>
                 </configuration>
             </plugin>
             <plugin>

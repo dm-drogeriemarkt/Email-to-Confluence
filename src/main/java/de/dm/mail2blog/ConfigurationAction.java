@@ -7,6 +7,7 @@ import com.atlassian.plugin.spring.scanner.annotation.imports.ComponentImport;
 import com.atlassian.user.EntityException;
 import com.atlassian.user.Group;
 import com.atlassian.user.GroupManager;
+import de.dm.mail2blog.base.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,7 @@ public class ConfigurationAction extends ConfluenceActionSupport {
     @Setter @Autowired          private MailConfigurationManager mailConfigurationManager;
     @Setter @Autowired          private ConfigurationActionState configurationActionState;
     @Getter @Setter @Autowired  private CheckboxTracker checkboxTracker;
+    @Setter @Autowired          private SpaceKeyValidator spaceKeyValidator;
     @Setter @Autowired          private GlobalState globalState;
     @Setter @ComponentImport    private SpaceManager spaceManager;
     @Setter @ComponentImport    private GroupManager groupManager;
@@ -103,7 +105,7 @@ public class ConfigurationAction extends ConfluenceActionSupport {
         }
 
         // Validate default space.
-        if (spaceManager.getSpace(getMailConfiguration().getDefaultSpace()) == null) {
+        if (!spaceKeyValidator.spaceExists(getMailConfiguration().getDefaultSpace())) {
             addFieldError("mailConfiguration.defaultSpace", "please choose a valid value");
             addActionError("please choose a valid default space");
         }
@@ -157,7 +159,7 @@ public class ConfigurationAction extends ConfluenceActionSupport {
                     .build();
 
                 try {
-                    spaceRule.validate(spaceManager);
+                    spaceRule.validate(spaceKeyValidator);
                 } catch (SpaceRuleValidationException e) {
                     addActionError("space rule " + (i+1) + ": " + e.toString());
                     addFieldError("mailConfiguration.spaceRules", "rule " + (i+1) + ": " + e.toString());

@@ -4,7 +4,7 @@ import com.atlassian.bandana.BandanaManager;
 import com.atlassian.confluence.setup.bandana.ConfluenceBandanaContext;
 import de.dm.mail2blog.MailConfiguration;
 import de.dm.mail2blog.MailConfigurationManager;
-import de.dm.mail2blog.SpaceRule;
+import de.dm.mail2blog.base.SpaceRule;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

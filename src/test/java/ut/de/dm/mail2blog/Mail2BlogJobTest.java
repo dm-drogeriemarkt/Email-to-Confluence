@@ -1,5 +1,6 @@
 package ut.de.dm.mail2blog;
 
+import com.atlassian.confluence.spaces.SpaceManager;
 import com.atlassian.sal.api.transaction.TransactionTemplate;
 import com.atlassian.scheduler.JobRunnerResponse;
 import com.atlassian.scheduler.status.RunOutcome;
@@ -30,13 +31,14 @@ public class Mail2BlogJobTest
     private Mail2BlogJob mail2BlogJob;
     private MailConfiguration mailConfiguration;
     private GlobalState globalState;
+    private SpaceManager spaceManager;
     private TransactionTemplate transactionTemplate;
     private Mailbox mailbox;
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
         // Read in example mail from disk.
-        InputStream is = MessageParserTest.class.getClassLoader().getResourceAsStream("exampleMail.eml");
+        InputStream is = Mail2BlogJobTest.class.getClassLoader().getResourceAsStream("exampleMail.eml");
         exampleMessage = new MimeMessage(null, is);
     }
 
@@ -47,7 +49,12 @@ public class Mail2BlogJobTest
 
         transactionTemplate = mock(TransactionTemplate.class);
         doReturn(transactionTemplate).when(mail2BlogJob).getTransactionTemplate();
-        mail2BlogJob.setSpaceExtractor(new SpaceExtractor());
+
+        spaceManager = mock(SpaceManager.class);
+        mail2BlogJob.setSpaceManager(spaceManager);
+
+        SpaceKeyValidator spaceKeyValidator = new SpaceKeyValidator(spaceManager);
+        mail2BlogJob.setSpaceKeyValidator(spaceKeyValidator);
 
         globalState = mock(GlobalState.class);
         mail2BlogJob.setGlobalState(globalState);

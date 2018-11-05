@@ -1,10 +1,13 @@
 package de.dm.mail2blog;
 
+import com.atlassian.confluence.spaces.SpaceManager;
 import com.atlassian.plugin.spring.scanner.annotation.export.ExportAsService;
+import com.atlassian.plugin.spring.scanner.annotation.imports.ComponentImport;
 import com.atlassian.sal.api.transaction.TransactionTemplate;
 import com.atlassian.scheduler.JobRunner;
 import com.atlassian.scheduler.JobRunnerRequest;
 import com.atlassian.scheduler.JobRunnerResponse;
+import de.dm.mail2blog.base.SpaceExtractor;
 import lombok.Cleanup;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -22,8 +25,9 @@ import javax.mail.Message;
 public class Mail2BlogJob implements JobRunner
 {
     // Auto wired components.
-    @Setter @Autowired          private GlobalState globalState;
-    @Setter @Autowired          private SpaceExtractor spaceExtractor;
+    @Setter @Autowired private GlobalState globalState;
+    @Setter @Autowired private SpaceKeyValidator spaceKeyValidator;
+    @Setter @Autowired private SpaceManager spaceManager;
 
     /**
      * The main method of this job.
@@ -54,7 +58,8 @@ public class Mail2BlogJob implements JobRunner
 
                 // Process message.
                 MessageTransaction transaction = MessageTransaction.builder()
-                .spaceExtractor(spaceExtractor)
+                .spaceExtractor(new SpaceExtractor(spaceKeyValidator))
+                .spaceManager(spaceManager)
                 .mailConfigurationWrapper(mailConfigurationWrapper)
                 .mailbox(mailbox)
                 .message(message)

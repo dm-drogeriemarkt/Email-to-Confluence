@@ -4,10 +4,9 @@ import com.atlassian.xwork.ParameterSafe;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NonNull;
+import de.dm.mail2blog.base.ContentTypes;
+import de.dm.mail2blog.base.SpaceRule;
+import lombok.*;
 
 import java.util.Scanner;
 
@@ -43,7 +42,7 @@ public class MailConfiguration {
     @NonNull private boolean spaceKeyInAddress;
     @NonNull private boolean spaceKeyInSubject;
 
-    @NonNull private SpaceRule[] spaceRules;
+    @NonNull @Getter(onMethod=@__({@ParameterSafe})) private SpaceRule[] spaceRules;
 
     // List of preferred content types to use.
     // There are preferred in the order of the list.
