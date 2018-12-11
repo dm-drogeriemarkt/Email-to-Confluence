@@ -16,7 +16,7 @@ public class ImapMailboxFlagStrategy implements IMailboxFlagFeature
     @NonNull private Mailbox mailbox;
 
     /**
-     * Get/create a folder below the default folder.
+     * Get/create a folder below the inbox or the root folder.
      *
      * @param name The name of the folder to create.
      * @return The created folder
@@ -24,9 +24,25 @@ public class ImapMailboxFlagStrategy implements IMailboxFlagFeature
      */
     private Folder getOrCreateFolder(@NonNull String name) throws MailboxException {
         Folder folder;
+        try {
+            folder = getOrCreateSubfolder(mailbox.getInbox(), name);
+        } catch (MailboxException inboxError) {
+            try {
+                log.info("failed to create folder '" + name + "' below INBOX, falling back to ROOT folder", inboxError);
+                folder = getOrCreateSubfolder(mailbox.getDefaultFolder(), name);
+            } catch (MailboxException rootError) {
+                throw new MailboxException("failed to get or create folder '" + name + '"', rootError);
+            }
+        }
+
+        return folder;
+    }
+
+    private Folder getOrCreateSubfolder(Folder parent, @NonNull String name) throws MailboxException {
+        Folder folder;
 
         try {
-            folder = mailbox.getInbox().getFolder(name);
+            folder = parent.getFolder(name);
         } catch (MessagingException me) {
             throw new MailboxException("failed to get folder '" + name + "'", me);
         }
