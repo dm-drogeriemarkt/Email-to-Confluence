@@ -25,6 +25,11 @@ public class Mailbox implements IMailboxFlagFeature {
     private Folder inbox;
 
     /**
+     * The default Folder (/).
+     */
+    private Folder defaultFolder;
+
+    /**
      * The Mailstore to use.
      */
     private Store store;
@@ -149,7 +154,7 @@ public class Mailbox implements IMailboxFlagFeature {
                 // Get the INBOX folder.
                 inbox = getStore().getFolder("INBOX");
 
-                // We need to open it READ_WRITE.
+                // We need to open it READ_WRITE,
                 // because we want to move/delete messages we already handled.
                 inbox.open(Folder.READ_WRITE);
             } catch (FolderNotFoundException fnfe) {
@@ -160,6 +165,28 @@ public class Mailbox implements IMailboxFlagFeature {
         }
 
         return inbox;
+    }
+
+    /**
+     * Get the default directory.
+     */
+    public Folder getDefaultFolder() throws MailboxException {
+        if (defaultFolder == null || !defaultFolder.isOpen()) {
+            try {
+                // Get the defaultFolder.
+                defaultFolder = getStore().getDefaultFolder();
+
+                // We need to open it READ_WRITE (There is no write only),
+                // because we want to move/delete messages we already handled.
+                defaultFolder.open(Folder.READ_WRITE);
+            } catch (FolderNotFoundException fnfe) {
+                throw new MailboxException("could not find ROOT folder", fnfe);
+            } catch (MessagingException e) {
+                throw new MailboxException("could not open ROOT folder", e);
+            }
+        }
+
+        return defaultFolder;
     }
 
     /**
@@ -189,7 +216,15 @@ public class Mailbox implements IMailboxFlagFeature {
             try {
                 inbox.close(true);
             } catch (MessagingException e) {
-                throw new MailboxException("failed to close INBOX", e);
+                throw new MailboxException("failed to close INBOX folder", e);
+            }
+        }
+
+        if (defaultFolder != null && defaultFolder.isOpen()) {
+            try {
+                defaultFolder.close(true);
+            } catch (MessagingException e) {
+                throw new MailboxException("failed to close ROOT folder", e);
             }
         }
 
