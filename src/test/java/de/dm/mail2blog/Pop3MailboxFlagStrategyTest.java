@@ -1,7 +1,5 @@
-package ut.de.dm.mail2blog;
+package de.dm.mail2blog;
 
-import de.dm.mail2blog.Mailbox;
-import de.dm.mail2blog.Pop3MailboxFlagStrategy;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;

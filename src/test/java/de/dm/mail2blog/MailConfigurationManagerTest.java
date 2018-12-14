@@ -1,9 +1,7 @@
-package ut.de.dm.mail2blog;
+package de.dm.mail2blog;
 
 import com.atlassian.bandana.BandanaManager;
 import com.atlassian.confluence.setup.bandana.ConfluenceBandanaContext;
-import de.dm.mail2blog.MailConfiguration;
-import de.dm.mail2blog.MailConfigurationManager;
 import de.dm.mail2blog.base.SpaceRule;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,7 +16,10 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MailConfigurationManagerTest

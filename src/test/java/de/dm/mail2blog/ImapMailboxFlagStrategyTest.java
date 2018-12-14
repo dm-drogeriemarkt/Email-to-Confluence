@@ -1,9 +1,6 @@
-package ut.de.dm.mail2blog;
+package de.dm.mail2blog;
 
 
-import de.dm.mail2blog.ImapMailboxFlagStrategy;
-import de.dm.mail2blog.Mailbox;
-import de.dm.mail2blog.MailboxException;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -24,8 +21,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 public class ImapMailboxFlagStrategyTest {
 
-    @Mock
-    Mailbox mailbox;
+    @Mock Mailbox mailbox;
     MailboxTestMockData mockData;
     ImapMailboxFlagStrategy strategy;
 

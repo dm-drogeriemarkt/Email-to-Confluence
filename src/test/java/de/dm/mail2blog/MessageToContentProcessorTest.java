@@ -1,7 +1,11 @@
-package ut.de.dm.mail2blog;
+package de.dm.mail2blog;
 
 import com.atlassian.confluence.core.DefaultSaveContext;
-import com.atlassian.confluence.pages.*;
+import com.atlassian.confluence.pages.Attachment;
+import com.atlassian.confluence.pages.AttachmentManager;
+import com.atlassian.confluence.pages.BlogPost;
+import com.atlassian.confluence.pages.Page;
+import com.atlassian.confluence.pages.PageManager;
 import com.atlassian.confluence.setup.settings.Settings;
 import com.atlassian.confluence.setup.settings.SettingsManager;
 import com.atlassian.confluence.spaces.Space;
@@ -13,11 +17,11 @@ import com.atlassian.user.GroupManager;
 import com.atlassian.user.User;
 import com.atlassian.user.search.SearchResult;
 import com.atlassian.user.search.page.Pager;
-import de.dm.mail2blog.MailConfiguration;
-import de.dm.mail2blog.MailConfigurationWrapper;
-import de.dm.mail2blog.MessageToContentProcessor;
-import de.dm.mail2blog.MessageToContentProcessorException;
-import de.dm.mail2blog.base.*;
+import de.dm.mail2blog.base.AttachementData;
+import de.dm.mail2blog.base.ContentTypes;
+import de.dm.mail2blog.base.Mail2BlogBaseConfiguration;
+import de.dm.mail2blog.base.MailPartData;
+import de.dm.mail2blog.base.MessageParser;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,8 +36,19 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.isA;
+import static org.mockito.Mockito.same;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MessageToContentProcessorTest

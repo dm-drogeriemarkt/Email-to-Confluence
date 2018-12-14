@@ -41,7 +41,7 @@ public class Mailbox implements IMailboxFlagFeature {
         this.mailConfigurationWrapper = mailConfigurationWrapper;
     }
 
-    private IMailboxFlagFeature getFlagStrategy() throws MailboxException {
+    IMailboxFlagFeature getFlagStrategy() throws MailboxException {
         if (this.flagStrategy == null) {
             // Choose flag strategy based on protocol.
             if (mailConfigurationWrapper.getMailConfiguration().getProtocol().endsWith("pop3")) {
@@ -141,7 +141,7 @@ public class Mailbox implements IMailboxFlagFeature {
     /**
      * Wrapper around javax.mail.Session.getInstance()
      */
-    public Session getSessionInstance(Properties props, Authenticator authenticator) {
+    Session getSessionInstance(Properties props, Authenticator authenticator) {
         return Session.getInstance(props, null);
     }
 

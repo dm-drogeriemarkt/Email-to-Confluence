@@ -1,10 +1,9 @@
-package ut.de.dm.mail2blog;
+package de.dm.mail2blog;
 
 import com.atlassian.confluence.setup.settings.Settings;
 import com.atlassian.confluence.setup.settings.SettingsManager;
 import com.atlassian.confluence.spaces.Space;
 import com.atlassian.confluence.spaces.SpaceManager;
-import de.dm.mail2blog.*;
 import de.dm.mail2blog.base.ContentTypes;
 import de.dm.mail2blog.base.Mail2BlogBaseConfiguration;
 import de.dm.mail2blog.base.SpaceExtractor;
@@ -22,7 +21,14 @@ import java.io.InputStream;
 import java.util.ArrayList;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MessageTransactionTest
@@ -33,11 +39,14 @@ public class MessageTransactionTest
     static Message exampleMessage;
 
     private Mail2BlogBaseConfiguration mail2BlogBaseConfiguration;
-    private Mailbox mailbox;
+    @Mock private Mailbox mailbox;
     @Mock private MessageToContentProcessor processor;
     @Mock private SpaceExtractor spaceExtractor;
-    private MessageTransaction messageTransaction;
+    @Mock private SettingsManager settingsManager;
     @Mock private Space space;
+    @Mock Settings globalSettings;
+    @Mock SpaceManager spaceManager;
+    private MessageTransaction messageTransaction;
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
@@ -48,15 +57,12 @@ public class MessageTransactionTest
 
     @Before
     public void setUp() throws Exception {
-        mailbox = mock(Mailbox.class);
+        initMocks(this);
 
         MailConfigurationWrapper mailConfigurationWrapper = spy(new MailConfigurationWrapper(
             MailConfiguration.builder().username("alice").emailaddress("alice@example.org").build()
         ));
 
-
-        SettingsManager settingsManager = mock(SettingsManager.class);
-        Settings globalSettings = mock(Settings.class);
         when(mailConfigurationWrapper.getSettingsManager()).thenReturn(settingsManager);
         when(settingsManager.getGlobalSettings()).thenReturn(globalSettings);
         when(globalSettings.getAttachmentMaxSize()).thenReturn((long)(1024 * 1024 * 100)); // 100 MB
@@ -67,8 +73,6 @@ public class MessageTransactionTest
         spaces.add(SpaceInfo.builder().spaceKey("space").contentType(ContentTypes.BlogPost).build());
 
         when(spaceExtractor.getSpaces(any(Mail2BlogBaseConfiguration.class), eq(exampleMessage))).thenReturn(spaces);
-
-        SpaceManager spaceManager = mock(SpaceManager.class);
         when(spaceManager.getSpace("space")).thenReturn(space);
 
         messageTransaction = spy(MessageTransaction.builder()

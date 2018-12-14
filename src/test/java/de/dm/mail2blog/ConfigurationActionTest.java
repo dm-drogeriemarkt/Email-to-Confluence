@@ -1,4 +1,4 @@
-package ut.de.dm.mail2blog;
+package de.dm.mail2blog;
 
 import com.atlassian.confluence.spaces.Space;
 import com.atlassian.confluence.spaces.SpaceManager;
@@ -6,23 +6,32 @@ import com.atlassian.json.jsonorg.JSONObject;
 import com.atlassian.user.Group;
 import com.atlassian.user.GroupManager;
 import com.atlassian.user.search.page.Pager;
-import de.dm.mail2blog.*;
 import de.dm.mail2blog.base.SpaceRule;
 import de.dm.mail2blog.base.SpaceRuleSpaces;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ConfigurationActionTest
@@ -36,8 +45,9 @@ public class ConfigurationActionTest
     private static final String GROUP1 = "Engineers";
     private static final String GROUP2 = "Cooks";
 
-    GroupManager groupManager = mock(GroupManager.class);
-    SpaceManager spaceManager = mock(SpaceManager.class);
+    @Mock GroupManager groupManager;
+    @Mock SpaceManager spaceManager;
+    @Mock GlobalState globalState;
 
     ConfigurationAction configurationAction;
     MailConfiguration mailConfiguration;
@@ -55,7 +65,6 @@ public class ConfigurationActionTest
         mailConfiguration = MailConfiguration.builder().build();
         MailConfigurationWrapper wrapper = new MailConfigurationWrapper(mailConfiguration);
 
-        GlobalState globalState = mock(GlobalState.class);
         when(globalState.getMailConfigurationWrapper()).thenReturn(wrapper);
 
         ConfigurationActionState actionState = new ConfigurationActionState();
@@ -107,6 +116,8 @@ public class ConfigurationActionTest
 
     @Before
     public void setUp() throws Exception {
+        initMocks(this);
+
         setUpCheckboxTracker();
         setUpSpaceManager();
         setUpGroupManager();

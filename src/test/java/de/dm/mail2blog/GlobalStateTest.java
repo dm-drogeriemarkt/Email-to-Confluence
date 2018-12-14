@@ -1,29 +1,29 @@
-package ut.de.dm.mail2blog;
+package de.dm.mail2blog;
 
-import de.dm.mail2blog.GlobalState;
-import de.dm.mail2blog.MailConfiguration;
-import de.dm.mail2blog.MailConfigurationManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GlobalStateTest
 {
     GlobalState globalState;
-    MailConfigurationManager configurationManager;
-    MailConfiguration mailConfiguration;
+    @Mock MailConfigurationManager configurationManager;
+    @Mock MailConfiguration mailConfiguration;
 
     @Before
     public void setUp() {
-        globalState = new GlobalState();
-        configurationManager = mock(MailConfigurationManager.class);
+        initMocks(this);
 
+        globalState = new GlobalState();
         mailConfiguration = MailConfiguration.builder()
             .username("alice")
             .emailaddress("alice@example.org")
