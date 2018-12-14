@@ -66,7 +66,7 @@ public class Mailbox implements IMailboxFlagFeature {
                             || StringUtils.isBlank(mailConfigurationWrapper.getMailConfiguration().getUsername())
                             || mailConfigurationWrapper.getMailConfiguration().getPassword() == null
             ) {
-                throw new MailboxException("incomplete mail configuration settings (at least one setting is null/empty)");
+                throw new MailboxException("incomplete mail configuration settings, this message will go away once you successfully save the configuration on the configuration page");
             }
 
             // Create the properties for the session.
