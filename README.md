@@ -1,3 +1,6 @@
+:warning: | This repository is not being maintained anymore.
+:---: | :---
+
 <h1 align="center">Email to Confluence</h1>
 
 <p align="center">
